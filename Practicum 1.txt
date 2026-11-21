@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!-- 1. HTML5 document structure: doctype, html, head, body -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Environmental Monitoring Portal</title>
+</head>
+
+<body>
+  <header>
+    <h1>Environmental Monitoring Portal</h1>
+    <p>Live information on air quality, water quality and pollution.</p>
+  </header>
+  <nav aria-label="Main navigation">
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#indicators">Indicators</a></li>
+      <li><a href="#data">Monitoring Data</a></li>
+      <li><a href="#alerts">Alerts</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <main>
+    <section id="about">
+      <h2>About Us</h2>
+      <p>We are an environmental organization that tracks the health of the air we breathe and the water we use.
+         This page shares our latest readings so that citizens and authorities can act early.</p>
+      <p>Data is collected from sensor stations placed across the city and updated every hour.</p>
+        <img src="C:\Users\shiva\Downloads\img.jpg" alt="Air quality monitoring" width="600" height="300">
+    </section>
+    <section id="indicators">
+      <h2>Environmental Indicators</h2>
+      <h3>What we measure</h3>
+      <ul>
+        <li>Air quality (PM2.5, PM10, CO<sub>2</sub>)</li>
+        <li>Water quality (pH, turbidity, dissolved oxygen)</li>
+        <li>Pollution (noise level, waste discharge)</li>
+      </ul>
+      <h3>How a reading is processed</h3>
+      <ol>
+        <li>Sensors collect raw data.</li>
+        <li>Data is sent to the central server.</li>
+        <li>Values are checked against safe limits.</li>
+        <li>Results are published on this page.</li>
+      </ol>
+      <h3>Key terms</h3>
+      <dl>
+        <dt>AQI</dt>
+        <dd>Air Quality Index, a single number that shows how clean or polluted the air is.</dd>
+        <dt>pH</dt>
+        <dd>A scale from 0 to 14 that shows how acidic or basic water is.</dd>
+      </dl>
+    </section>
+    <section id="data">
+      <h2>Monitoring Data</h2>
+  <table border="1"z>
+  <caption>Latest readings by monitoring station</caption>
+  <thead>
+    <tr>
+      <th scope="col">Station</th>
+      <th scope="col">AQI</th>
+      <th scope="col">Water pH</th>
+      <th scope="col">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Riverside</th>
+      <td>45</td>
+      <td>7.2</td>
+      <td>Good</td>
+    </tr>
+    <tr>
+      <th scope="row">Industrial Zone</th>
+      <td>162</td>
+      <td>6.4</td>
+      <td>Unhealthy</td>
+    </tr>
+    <tr>
+      <th scope="row">City Centre</th>
+      <td>98</td>
+      <td>7.0</td>
+      <td>Moderate</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="4">Last updated: <time datetime="2026-10-10T09:00">10 Oct 2026, 9:00 AM</time></td>
+    </tr>
+  </tfoot>
+</table>
+    </section>
+    <section id="alerts">
+      <h2>Alerts and Awareness</h2>
+      <article class="alert">
+        <h3>Air Quality Alert: Industrial Zone</h3>
+        <p><time datetime="2026-10-10">10 October 2026</time></p>
+        <p>AQI has crossed 150. Residents with breathing problems should stay indoors and wear a mask outside.</p>
+      </article>
+      <article>
+        <h3>Tip: Keep Water Sources Clean</h3>
+        <p>Do not dump plastic or chemicals into rivers and drains. Small habits protect the water everyone shares.</p>
+        <p>Learn more on the
+          <a href="https://www.who.int/health-topics/air-pollution" target="_blank" rel="noopener noreferrer">WHO air pollution page</a>.
+        </p>
+      </article>
+      <aside>
+        <p><strong>Did you know?</strong> Air pollution is one of the biggest environmental risks to health worldwide.</p>
+      </aside>
+    </section>
+    <section id="contact">
+      <h2>Contact</h2>
+      <address>
+        Environmental Monitoring Office<br>
+        Email: <a href="mailto:info@example.org">info@example.org</a>
+      </address>
+      <p><a href="#top">Back to top</a></p>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2026 Environmental Monitoring Portal. All rights reserved.</p>
+    <p><a href="#about">About</a> | <a href="#data">Data</a> | <a href="#contact">Contact</a></p>
+  </footer>
+</body>
+</html>
