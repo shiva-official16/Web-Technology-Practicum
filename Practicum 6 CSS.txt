@@ -1,0 +1,1053 @@
+/* =========================================================
+   1. DESIGN TOKENS
+   ========================================================= */
+:root {
+  --ink:        #12303F;
+  --ink-soft:   #35505E;
+  --water:      #1B7F8E;
+  --water-dark: #135F6B;
+  --leaf:       #2F8F5B;
+  --amber:      #B7791F;
+  --alert:      #C0392B;
+  --mist:       #E8F0F3;
+  --paper:      #FFFFFF;
+  --line:       #D3E0E6;
+  --radius:     12px;
+  --shadow:     0 2px 10px rgba(18, 48, 63, 0.08);
+  --nav-height: 56px;
+}
+
+/* =========================================================
+   2. RESET + BOX MODEL
+   ========================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  background-color: var(--mist);
+}
+
+/* =========================================================
+   3. HEADER
+   position: relative  -> anchor for the absolute chip
+   position: absolute  -> "Updated every hour" chip (::after)
+   ========================================================= */
+header#top {
+  position: relative;
+  text-align: center;
+  padding: 3.5rem 1.5rem 3rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ink) 0%, #1A4D5E 55%, var(--water) 100%);
+}
+
+header#top h1 {
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+header#top p {
+  max-width: 36rem;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  color: #D4E8EE;
+}
+
+header#top::after {
+  content: "Updated every hour";
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  padding: 0.25rem 0.8rem;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   4. NAVIGATION (Flexbox)
+   position: sticky -> stays at the top of the window
+   ========================================================= */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: var(--nav-height);
+  background-color: var(--paper);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+nav ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  list-style: none;
+}
+
+nav li {
+  flex: 0 0 auto;
+}
+
+nav a {
+  display: block;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+nav a:hover,
+nav a:focus-visible {
+  background-color: var(--water);
+  color: #fff;
+}
+
+/* =========================================================
+   5. PAGE LAYOUT
+   ========================================================= */
+main {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 1rem;
+}
+
+main > section {
+  scroll-margin-top: calc(var(--nav-height) + 1rem);
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* =========================================================
+   6. TYPOGRAPHY
+   ========================================================= */
+h2 {
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.6rem;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  color: var(--ink);
+  border-bottom: 3px solid var(--water);
+}
+
+h3 {
+  margin: 1.75rem 0 0.7rem;
+  font-size: 1.15rem;
+  color: var(--water-dark);
+}
+
+p {
+  margin: 0 0 1rem;
+  max-width: 70ch;
+}
+
+a {
+  color: var(--water-dark);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: 2px;
+}
+
+code {
+  padding: 0.1rem 0.4rem;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  color: var(--ink);
+  background-color: var(--mist);
+  border-radius: 4px;
+}
+
+/* =========================================================
+   7. FIGURES AND IMAGES
+   ========================================================= */
+figure {
+  margin: 1.5rem 0;
+  padding: 0.75rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+figure img,
+figure iframe,
+figure video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background-color: #CBDCE3;
+}
+
+figure img {
+  max-width: 600px;
+  margin: 0 auto;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+figure img:hover {
+  transform: scale(1.02);
+}
+
+figure iframe {
+  height: 350px;
+  border: 0;
+}
+
+figure video {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+figcaption {
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 0.88rem;
+  font-style: italic;
+  color: #5B7482;
+}
+
+.figure-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.figure-row figure {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------
+   7b. IMAGE FRAME + BADGE
+   position: relative -> the frame is the anchor
+   position: absolute -> the badge sits on the photo
+   --------------------------------------------------------- */
+.media-frame {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow: hidden;            /* keeps the zoom-on-hover inside the frame */
+  border-radius: 8px;
+}
+
+.media-tag {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 999px;
+  background-color: var(--ink);
+  pointer-events: none;        /* clicks and hover pass through to the image */
+}
+
+.tag-live,
+.tag-live::before { background-color: var(--alert); }
+
+.tag-live {
+  padding-left: 1.6rem;
+}
+
+.tag-live::before {                /* absolute dot inside an absolute badge */
+  content: "";
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: -0.25rem;
+  background-color: #fff;
+  border-radius: 50%;
+}
+
+.tag-water { background-color: var(--water-dark); }
+.tag-air   { background-color: var(--amber); }
+
+/* =========================================================
+   8. LISTS AND DEFINITIONS
+   ========================================================= */
+#indicators ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#indicators ul li {
+  padding: 0.9rem 1rem;
+  background-color: var(--mist);
+  border-left: 5px solid var(--water);
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#indicators ul li:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+ol {
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ol li {
+  counter-increment: step;
+  position: relative;               /* anchor for the absolute number */
+  margin-bottom: 0.7rem;
+  padding: 0.6rem 1rem 0.6rem 3.2rem;
+  background-color: var(--mist);
+  border-radius: 8px;
+}
+
+ol li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.8rem;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  background-color: var(--water);
+  border-radius: 50%;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+dl > div,
+dt,
+dd {
+  margin: 0;
+}
+
+dt {
+  padding: 0.7rem 1rem 0.2rem;
+  font-weight: 700;
+  color: var(--ink);
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+dd {
+  padding: 0 1rem 0.8rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+/* =========================================================
+   9. AQI SCALE
+   position: relative -> container
+   position: absolute -> bar, pins and end labels
+   ========================================================= */
+.aqi-scale {
+  position: relative;
+  height: 7.5rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.aqi-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1rem;
+  margin-top: -0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    var(--leaf)  0 16.6%,
+    #D4A72C      16.6% 33.3%,
+    #E8883A      33.3% 50%,
+    var(--alert) 50% 66.6%,
+    #8E3B8F      66.6% 83.3%,
+    #6B1F3A      83.3% 100%);
+}
+
+.aqi-pin {
+  position: absolute;
+  left: var(--pos);
+  transform: translateX(-50%);
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #fff;
+  background-color: var(--ink);
+  border-radius: 6px;
+}
+
+.aqi-pin b {
+  margin-left: 0.25rem;
+}
+
+.aqi-pin::after {                   /* little stem that points at the bar */
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 0.9rem;
+  margin-left: -1px;
+  background-color: var(--ink);
+}
+
+.pin-up   { top: 0.2rem; }
+.pin-down { bottom: 0.2rem; }
+.pin-up::after   { top: 100%; }
+.pin-down::after { bottom: 100%; }
+
+.aqi-end {
+  position: absolute;
+  top: 50%;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: #5B7482;
+}
+
+.end-left  { left: 0; }
+.end-right { right: 0; }
+
+/* =========================================================
+   10. TABLE
+   position: sticky -> header row (top) and first column (left)
+   ========================================================= */
+.table-scroll {
+  max-height: 20rem;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  min-width: 36rem;                 /* forces sideways scrolling on narrow screens */
+  border-collapse: separate;        /* sticky cells keep their borders */
+  border-spacing: 0;
+}
+
+caption {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+  background-color: var(--paper);
+}
+
+th,
+td {
+  padding: 0.85rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: #fff;
+  background-color: var(--ink);
+  border-bottom: 0;
+}
+
+thead th:first-child {              /* top-left corner sticks both ways */
+  left: 0;
+  z-index: 3;
+}
+
+tbody tr {
+  background-color: var(--paper);
+  transition: background-color 0.2s;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #F4F8FA;
+}
+
+tbody tr:hover {
+  background-color: #D9ECF0;
+}
+
+tbody th[scope="row"] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left;
+  color: var(--ink);
+  background-color: inherit;        /* takes the row colour so text never shows through */
+  border-right: 1px solid var(--line);
+}
+
+tfoot td {
+  text-align: right;
+  font-size: 0.88rem;
+  color: #5B7482;
+  border-bottom: 0;
+  background-color: var(--paper);
+}
+
+.status {
+  display: inline-block;
+  min-width: 6.5rem;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 999px;
+}
+
+.status.good      { background-color: var(--leaf); }
+.status.moderate  { background-color: var(--amber); }
+.status.unhealthy { background-color: var(--alert); }
+
+/* comparison table needs no scroll limit */
+.table-plain {
+  max-height: none;
+}
+
+.table-plain table {
+  min-width: 34rem;
+}
+
+.compare td {
+  text-align: left;
+}
+
+/* =========================================================
+   11. MEDIA SECTION
+   ========================================================= */
+audio {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+}
+
+#media figure > figcaption:first-child {
+  margin: 0 0 0.6rem;
+  font-style: normal;
+  font-weight: 600;
+  text-align: left;
+  color: var(--ink);
+}
+
+details {
+  padding: 0.75rem 1rem;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--water-dark);
+}
+
+summary:hover {
+  color: var(--ink);
+}
+
+details p {
+  margin: 0.75rem 0 0;
+}
+
+/* =========================================================
+   12. ALERTS
+   position: relative -> article is the anchor
+   position: absolute -> "New" ribbon
+   ========================================================= */
+article {
+  position: relative;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--leaf);
+  border-radius: var(--radius);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+article:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+article h3 {
+  margin-top: 0;
+}
+
+article.alert {
+  background-color: #FDF0EE;
+  border-color: #F1C9C3;
+  border-left-color: var(--alert);
+}
+
+article.alert h3 {
+  color: var(--alert);
+}
+
+article time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5B7482;
+}
+
+.ribbon {
+  position: absolute;
+  top: -1px;
+  right: 1.25rem;
+  padding: 0.25rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--alert);
+  border-radius: 0 0 8px 8px;
+}
+
+aside {
+  padding: 1rem 1.25rem;
+  text-align: center;
+  background-color: #E3F2F5;
+  border: 2px dashed var(--water);
+  border-radius: var(--radius);
+}
+
+aside p {
+  max-width: none;
+  margin: 0;
+}
+
+/* =========================================================
+   13. POSITIONING SECTION
+   ========================================================= */
+.pos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+/* cards in this grid are articles: switch off the lift effect */
+.pos-card {
+  margin: 0;
+  padding: 1.1rem;
+  border-left-width: 1px;
+  border-top: 5px solid var(--water);
+}
+
+.pos-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.pos-card h4 {
+  margin: 0 0 0.7rem;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.pos-card p {
+  margin-bottom: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.pos-use {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+
+/* demo area: always a positioned container */
+.pos-demo {
+  position: relative;
+  height: 10.5rem;
+  margin-bottom: 0.9rem;
+  padding: 0.5rem;
+  overflow: hidden;
+  background-color: var(--paper);
+  border: 2px dashed var(--water);
+  border-radius: 8px;
+}
+
+.pos-block {
+  margin-bottom: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--ink);
+  background-color: #CFE3E8;
+  border-radius: 6px;
+}
+
+.pos-target {
+  color: #fff;
+  background-color: var(--water-dark);
+}
+
+/* the actual positioning being demonstrated */
+.t-relative {
+  position: relative;
+  top: 8px;
+  left: 24px;
+}
+
+.t-absolute {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  max-width: 70%;
+}
+
+/* fixed simulation: the chip stays while the track scrolls */
+.pos-viewport {
+  padding: 0;
+  border-style: solid;
+  border-color: var(--ink);
+}
+
+.scroll-track {
+  padding: 0.5rem;
+  animation: drift 6s ease-in-out infinite alternate;
+}
+
+.fixed-chip {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  margin: 0;
+  box-shadow: 0 2px 6px rgba(18, 48, 63, 0.35);
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-7rem); }
+}
+
+/* real sticky demo */
+.pos-scroll {
+  padding: 0;
+  overflow-y: auto;
+}
+
+.pos-scroll .pos-block {
+  margin: 0.4rem 0.5rem;
+}
+
+.sticky-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--water-dark);
+}
+
+/* ---------------- Playground ---------------- */
+.playground {
+  padding: 1rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.pg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 1rem;
+  padding: 0.5rem 1rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background-color: var(--paper);
+}
+
+.pg-controls legend {
+  padding: 0 0.4rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pg-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: Consolas, "Courier New", monospace;
+  cursor: pointer;
+}
+
+.pg-stage {
+  position: relative;               /* anchor for the absolute option */
+  height: 15rem;
+  padding: 0.6rem;
+  overflow: auto;
+  background-color: #D5E1E6;
+  border: 2px dashed var(--water);
+  border-radius: 8px;
+}
+
+.pg-box {
+  /* position is switched by script.js */
+  top: 24px;
+  left: 48px;
+  z-index: 5;
+  width: 11rem;
+  margin-bottom: 0.4rem;
+  padding: 0.6rem 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--alert);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(18, 48, 63, 0.3);
+}
+
+.pg-code {
+  margin: 1rem 0 0.5rem;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  color: #E8F0F3;
+  background-color: var(--ink);
+  border-radius: 8px;
+}
+
+.pg-code code {
+  padding: 0;
+  color: inherit;
+  background: none;
+}
+
+.pg-note {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+/* =========================================================
+   14. CONTACT + FIXED ELEMENTS + FOOTER
+   ========================================================= */
+address {
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  font-style: normal;
+  line-height: 1.8;
+  background-color: var(--mist);
+  border-left: 5px solid var(--water);
+  border-radius: 8px;
+}
+
+/* position: fixed -> bottom right */
+a.back-to-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 200;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background-color: var(--water);
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(18, 48, 63, 0.3);
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+a.back-to-top:hover {
+  color: #fff;
+  background-color: var(--ink);
+  transform: translateY(-3px);
+}
+
+/* position: fixed -> bottom left, live alert */
+.fixed-alert {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 190;
+  width: 17rem;
+  padding: 0.8rem 2.2rem 0.8rem 1rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink);
+  background-color: #FDF0EE;
+  border: 1px solid #F1C9C3;
+  border-left: 6px solid var(--alert);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(18, 48, 63, 0.25);
+}
+
+.fixed-alert[hidden] {
+  display: none;
+}
+
+.fixed-alert p {
+  margin: 0 0 0.3rem;
+}
+
+.fixed-alert strong {
+  color: var(--alert);
+}
+
+.fixed-alert a {
+  font-weight: 600;
+}
+
+.fixed-alert button {
+  position: absolute;               /* close button inside the fixed box */
+  top: 0.35rem;
+  right: 0.45rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+}
+
+.fixed-alert button:hover {
+  background-color: #F1C9C3;
+}
+
+footer {
+  margin-top: 2rem;
+  padding: 2rem 1.5rem 5rem;        /* extra room so fixed boxes never cover the footer links */
+  text-align: center;
+  color: #C5D9E0;
+  background-color: var(--ink);
+}
+
+footer p {
+  max-width: none;
+  margin: 0.3rem 0;
+}
+
+footer a {
+  padding: 0 0.4rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #8FD3DE;
+  text-decoration: underline;
+}
+
+/* =========================================================
+   15. RESPONSIVE
+   ========================================================= */
+@media (max-width: 768px) {
+  nav ul {
+    gap: 0.4rem;
+  }
+
+  nav li {
+    flex: 1 1 30%;
+  }
+
+  nav a {
+    text-align: center;
+    padding: 0.55rem 0.5rem;
+    font-size: 0.9rem;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --nav-height: 0px;
+  }
+
+  nav {
+    position: static;               /* sticky switched off: a tall stacked menu would hide too much */
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  nav li {
+    flex: none;
+  }
+
+  nav a {
+    background-color: var(--mist);
+    border: 1px solid var(--line);
+  }
+
+  .fixed-alert {
+    width: auto;
+    right: 6.5rem;                  /* leaves space for the Back to top button */
+  }
+}
+
+@media (max-width: 700px) {
+  main > section { padding: 1.25rem; }
+  header#top::after { position: static; display: inline-block; margin-top: 1rem; }
+  figure iframe { height: 260px; }
+  th, td { padding: 0.6rem 0.5rem; font-size: 0.9rem; }
+  .aqi-pin { font-size: 0.72rem; padding: 0.1rem 0.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+  .scroll-track { animation: none; }
+}

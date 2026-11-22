@@ -1,0 +1,2228 @@
+/* =========================================================
+   1. MOBILE MENU
+   Opens and closes the dropdown. The CSS only shows the
+   button and dropdown on screens 600px wide or narrower.
+   ========================================================= */
+(function () {
+  var nav = document.getElementById("siteNav");
+  var button = document.getElementById("navToggle");
+  var list = document.getElementById("navList");
+
+  if (!nav || !button || !list) return;
+
+  function setOpen(open) {
+    nav.classList.toggle("open", open);
+    button.setAttribute("aria-expanded", String(open));
+  }
+
+  // Button toggles the menu
+  button.addEventListener("click", function () {
+    setOpen(!nav.classList.contains("open"));
+  });
+
+  // Choosing a link closes the menu
+  list.addEventListener("click", function (event) {
+    if (event.target.closest("a")) setOpen(false);
+  });
+
+  // Clicking outside the menu closes it
+  document.addEventListener("click", function (event) {
+    if (nav.classList.contains("open") && !nav.contains(event.target)) setOpen(false);
+  });
+
+  // Escape closes it and returns focus to the button
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && nav.classList.contains("open")) {
+      setOpen(false);
+      button.focus();
+    }
+  });
+
+  // Growing past the mobile breakpoint resets the menu
+  var wide = window.matchMedia("(min-width: 601px)");
+  wide.addEventListener("change", function (event) {
+    if (event.matches) setOpen(false);
+  });
+})();
+
+/* =========================================================
+   2. LIVE WINDOW WIDTH
+   Shows the current width next to the breakpoint name.
+   ========================================================= */
+(function () {
+  var output = document.getElementById("bpWidth");
+  if (!output) return;
+
+  function show() {
+    output.textContent = "(" + window.innerWidth + " px wide)";
+  }
+
+  show();
+  window.addEventListener("resize", show);
+})();
+
+/* =========================================================
+   3. POSITIONING PLAYGROUND
+   Switches the position value of the demo box and explains it.
+   Animated: the box pops and the note fades when the value changes.
+   ========================================================= */
+(function () {
+  var box = document.getElementById("pgBox");
+  var code = document.getElementById("pgCode");
+  var note = document.getElementById("pgNote");
+  var radios = document.querySelectorAll('input[name="pos"]');
+
+  if (!box || !code || !note || !radios.length) return;
+
+  var info = {
+    static: {
+      css: "position: static;\ntop: 24px; left: 48px;  /* ignored */",
+      text: "Static: the box stays in the normal flow and the offsets do nothing."
+    },
+    relative: {
+      css: "position: relative;\ntop: 24px; left: 48px;",
+      text: "Relative: the box moves 24px down and 48px right of its normal spot, but the gap it left behind is kept."
+    },
+    absolute: {
+      css: "position: absolute;\ntop: 24px; left: 48px;",
+      text: "Absolute: the box leaves the flow (the readings below move up) and is placed against the grey area, which is its positioned parent."
+    },
+    fixed: {
+      css: "position: fixed;\ntop: 90px; right: 20px;",
+      text: "Fixed: the box jumps out to the browser window and stays there while you scroll the page. Switch back to another value to bring it home."
+    },
+    sticky: {
+      css: "position: sticky;\ntop: 0;",
+      text: "Sticky: scroll inside the grey area. The box scrolls normally until it reaches the top edge, then it sticks."
+    }
+  };
+
+  function apply(value) {
+    // reset everything the previous choice may have set
+    box.style.position = value;
+    box.style.top = "24px";
+    box.style.left = "48px";
+    box.style.right = "auto";
+
+    if (value === "fixed") {
+      box.style.top = "90px";
+      box.style.left = "auto";
+      box.style.right = "20px";
+    } else if (value === "sticky") {
+      box.style.top = "0";
+      box.style.left = "auto";
+    }
+
+    code.querySelector("code").textContent = info[value].css;
+
+    // Animate: the note fades out and back in, the box pops
+    note.classList.add("fading");
+    setTimeout(function () {
+      note.textContent = info[value].text;
+      note.classList.remove("fading");
+    }, 150);
+
+    box.classList.remove("pop");
+    void box.offsetWidth;            // restart the animation
+    box.classList.add("pop");
+  }
+
+  radios.forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      if (radio.checked) apply(radio.value);
+    });
+  });
+
+  apply("static");
+  box.classList.remove("pop");       // no pop on first load
+})();
+
+/* =========================================================
+   4. DISMISS THE FIXED LIVE ALERT
+   Slides away first, then is hidden.
+   ========================================================= */
+(function () {
+  var alertBox = document.getElementById("fixedAlert");
+  var closeBtn = document.getElementById("fixedAlertClose");
+
+  if (!alertBox || !closeBtn) return;
+
+  closeBtn.addEventListener("click", function () {
+    alertBox.classList.add("closing");        // starts the slide-out animation
+    setTimeout(function () {
+      alertBox.hidden = true;                 // hidden once the animation has finished
+      alertBox.classList.remove("closing");
+    }, 350);
+  });
+})();
+
+/* =========================================================
+   5. NOTIFICATIONS (TOASTS)
+   showToast() builds a card, it slides in (CSS animation),
+   waits, then slides out and is removed.
+   ========================================================= */
+(function () {
+  var stack = document.getElementById("toastStack");
+  if (!stack) return;
+
+  var DISPLAY_TIME = 3500;   // how long a toast stays on screen
+  var EXIT_TIME = 350;       // matches the slideOutRight animation
+
+  function removeToast(toast) {
+    if (!toast.parentNode) return;
+    toast.classList.add("hide");
+    setTimeout(function () {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, EXIT_TIME);
+  }
+
+  window.showToast = function (title, message, type) {
+    var toast = document.createElement("div");
+    toast.className = "toast " + (type || "success");
+
+    var strong = document.createElement("strong");
+    strong.textContent = title;
+    var text = document.createElement("span");
+    text.textContent = message;
+
+    var close = document.createElement("button");
+    close.type = "button";
+    close.className = "toast-close";
+    close.setAttribute("aria-label", "Dismiss notification");
+    close.innerHTML = "&times;";
+
+    toast.appendChild(strong);
+    toast.appendChild(text);
+    toast.appendChild(close);
+    stack.appendChild(toast);
+
+    var timer = setTimeout(function () { removeToast(toast); }, DISPLAY_TIME);
+
+    close.addEventListener("click", function () {
+      clearTimeout(timer);
+      removeToast(toast);
+    });
+
+    // Keep at most 3 toasts on screen
+    while (stack.children.length > 3) stack.removeChild(stack.firstChild);
+  };
+
+  // Demo buttons in the Animations section
+  var messages = {
+    success: ["Saved", "Your settings were saved.", "success"],
+    warning: ["Warning", "Industrial Zone AQI is above 150.", "warning"],
+    error:   ["Error", "Could not reach the Harbour Docks station.", "error"]
+  };
+
+  document.querySelectorAll("[data-toast]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var m = messages[btn.dataset.toast];
+      if (m) window.showToast(m[0], m[1], m[2]);
+    });
+  });
+})();
+
+/* =========================================================
+   6. STATION CARDS: OPEN AND CLOSE DETAILS
+   The button toggles .expanded, CSS animates the height.
+   ========================================================= */
+(function () {
+  var buttons = document.querySelectorAll(".card-toggle");
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var card = btn.closest(".stat-card");
+      var open = card.classList.toggle("expanded");
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Hide details" : "Show details";
+    });
+  });
+})();
+
+/* =========================================================
+   7. GALLERY: INFORMATION CARD OVER THE PHOTO
+   ========================================================= */
+(function () {
+  var gallery = document.querySelector(".gallery");
+  if (!gallery) return;
+
+  function setOpen(frame, open) {
+    frame.classList.toggle("info-open", open);
+    var btn = frame.querySelector(".info-btn");
+    if (btn) btn.setAttribute("aria-expanded", String(open));
+  }
+
+  gallery.addEventListener("click", function (event) {
+    var btn = event.target.closest(".info-btn");
+    if (!btn) return;
+    var frame = btn.closest(".gallery-frame");
+    setOpen(frame, !frame.classList.contains("info-open"));
+  });
+
+  // Escape closes any open information card
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    gallery.querySelectorAll(".info-open").forEach(function (frame) {
+      setOpen(frame, false);
+    });
+  });
+})();
+
+/* =========================================================
+   8. ALERT CARD: SUBSCRIBE, SAFETY ADVICE, MARK AS READ
+   ========================================================= */
+(function () {
+  var subscribe = document.getElementById("subscribeBtn");
+  var adviceBtn = document.getElementById("adviceToggle");
+  var advice = document.getElementById("advicePanel");
+  var readBtn = document.getElementById("markRead");
+  var alertCard = document.querySelector("article.alert");
+
+  // Subscribe: loading spinner, then success state and a notification
+  if (subscribe) {
+    var label = subscribe.querySelector(".btn-label");
+    var busy = false;
+
+    subscribe.addEventListener("click", function () {
+      if (busy) return;
+
+      // Already subscribed: the next click unsubscribes
+      if (subscribe.classList.contains("done")) {
+        subscribe.classList.remove("done");
+        subscribe.setAttribute("aria-pressed", "false");
+        label.textContent = "Subscribe to alerts";
+        if (window.showToast) window.showToast("Unsubscribed", "You will no longer get alert updates.", "warning");
+        return;
+      }
+
+      busy = true;
+      subscribe.classList.add("loading");
+      subscribe.disabled = true;
+      label.textContent = "Subscribing...";
+
+      setTimeout(function () {
+        subscribe.classList.remove("loading");
+        subscribe.classList.add("done");
+        subscribe.disabled = false;
+        subscribe.setAttribute("aria-pressed", "true");
+        label.textContent = "Subscribed";
+        busy = false;
+        if (window.showToast) window.showToast("Subscribed", "You will get Industrial Zone alerts.", "success");
+      }, 1500);
+    });
+  }
+
+  // Safety advice: open and close a content section
+  if (adviceBtn && advice) {
+    adviceBtn.addEventListener("click", function () {
+      var open = advice.classList.toggle("open");
+      adviceBtn.setAttribute("aria-expanded", String(open));
+      adviceBtn.textContent = open ? "Hide safety advice" : "Show safety advice";
+    });
+  }
+
+  // Mark as read: the card changes colour and the ribbon slides away
+  if (readBtn && alertCard) {
+    readBtn.addEventListener("click", function () {
+      var read = alertCard.classList.toggle("is-read");
+      readBtn.classList.toggle("active", read);
+      readBtn.setAttribute("aria-pressed", String(read));
+      readBtn.textContent = read ? "Marked as read" : "Mark as read";
+      if (read && window.showToast) {
+        window.showToast("Marked as read", "This alert is now in your read list.", "success");
+      }
+    });
+  }
+})();
+
+/* =========================================================
+   9. STATION MANAGER (DOM manipulation)
+   Keeps one array of stations and rebuilds the station list,
+   the readings table, the summary cards and the live alert
+   from it, so nothing needs a page reload.
+   ========================================================= */
+(function () {
+  var listEl = document.getElementById("stationList");
+  var tbody = document.querySelector("#data tbody");
+  var form = document.getElementById("mgrForm");
+  if (!listEl || !tbody || !form) return;
+
+  var inputs = {
+    name:  document.getElementById("fName"),
+    aqi:   document.getElementById("fAqi"),
+    pm:    document.getElementById("fPm"),
+    ph:    document.getElementById("fPh"),
+    noise: document.getElementById("fNoise")
+  };
+  var submitBtn = document.getElementById("mgrSubmit");
+  var cancelBtn = document.getElementById("mgrCancel");
+  var errorEl = document.getElementById("mgrError");
+  var titleEl = document.getElementById("mgrFormTitle");
+  var searchEl = document.getElementById("stationSearch");
+  var filtersEl = document.getElementById("mgrFilters");
+  var emptyEl = document.getElementById("mgrEmpty");
+  var resetBtn = document.getElementById("mgrReset");
+  var logEl = document.getElementById("activityLog");
+  var clearLogBtn = document.getElementById("clearLog");
+  var timeEl = document.querySelector("#data tfoot time");
+
+  // Lets the report form (section 10) read the current station names
+  window.getStationNames = function () {
+    return stations.map(function (st) { return st.name; });
+  };
+
+  // Lets the comparison tool (section 13) read the current stations
+  window.getStations = function () {
+    return clone(stations);
+  };
+
+  var STORAGE_KEY = "emp-stations-v1";
+  var DEFAULTS = [
+    { id: 1, name: "Riverside",        aqi: 45,  pm: 11, ph: 7.2, noise: 48 },
+    { id: 2, name: "Industrial Zone",  aqi: 162, pm: 74, ph: 6.4, noise: 82 },
+    { id: 3, name: "City Centre",      aqi: 98,  pm: 36, ph: 7.0, noise: 68 },
+    { id: 4, name: "Lakeside",         aqi: 38,  pm: 8,  ph: 7.4, noise: 42 },
+    { id: 5, name: "Highway Junction", aqi: 88,  pm: 31, ph: 6.9, noise: 79 },
+    { id: 6, name: "Harbour Docks",    aqi: 171, pm: 85, ph: 6.5, noise: 86 },
+    { id: 7, name: "Hillside Park",    aqi: 32,  pm: 7,  ph: 7.3, noise: 40 }
+  ];
+  var RULES = [
+    { key: "aqi",   label: "AQI",      min: 0, max: 500, decimals: 0 },
+    { key: "pm",    label: "PM2.5",    min: 0, max: 500, decimals: 0 },
+    { key: "ph",    label: "Water pH", min: 0, max: 14,  decimals: 1 },
+    { key: "noise", label: "Noise",    min: 0, max: 150, decimals: 0 }
+  ];
+
+  var stations = load();
+  var nextId = 1;
+  var editingId = null;
+  var filter = "all";
+  var query = "";
+
+  stations.forEach(function (s) { if (s.id >= nextId) nextId = s.id + 1; });
+
+  /* ---------- helpers ---------- */
+  function clone(list) {
+    return list.map(function (s) {
+      return { id: s.id, name: s.name, aqi: s.aqi, pm: s.pm, ph: s.ph, noise: s.noise };
+    });
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
+  function setText(id, text) {
+    var node = document.getElementById(id);
+    if (node) node.textContent = text;
+  }
+
+  function toast(title, message, type) {
+    if (window.showToast) window.showToast(title, message, type);
+  }
+
+  function plural(n, word) {
+    return n + " " + word + (n === 1 ? "" : "s");
+  }
+
+  function joinNames(names) {
+    if (names.length <= 1) return names.join("");
+    return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  }
+
+  // Same bands as the AQI scale: up to 50 Good, up to 150 Moderate, above that Unhealthy
+  function statusOf(aqi) {
+    if (aqi <= 50)  return { key: "good",      label: "Good" };
+    if (aqi <= 150) return { key: "moderate",  label: "Moderate" };
+    return { key: "unhealthy", label: "Unhealthy" };
+  }
+
+  function findIndex(id) {
+    for (var i = 0; i < stations.length; i++) {
+      if (stations[i].id === id) return i;
+    }
+    return -1;
+  }
+
+  /* ---------- storage (optional: survives a reload) ---------- */
+  function load() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (Array.isArray(saved) && saved.every(function (s) {
+        return s && typeof s.name === "string" && typeof s.id === "number" &&
+               isFinite(s.aqi) && isFinite(s.pm) && isFinite(s.ph) && isFinite(s.noise);
+      })) {
+        return saved;
+      }
+    } catch (e) { /* storage blocked: fall back to the defaults */ }
+    return clone(DEFAULTS);
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stations)); } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- rendering: station cards (createElement + appendChild) ---------- */
+  function buildCard(st) {
+    var s = statusOf(st.aqi);
+
+    var li = document.createElement("li");
+    li.className = "station-item " + s.key;
+    li.setAttribute("data-id", String(st.id));
+    if (st.id === editingId) li.classList.add("editing");
+
+    var head = document.createElement("div");
+    head.className = "si-head";
+
+    var name = document.createElement("span");
+    name.className = "si-name";
+    name.textContent = st.name;               // textContent: user text is never run as HTML
+
+    var badge = document.createElement("span");
+    badge.className = "status " + s.key;
+    badge.textContent = s.label;
+
+    head.appendChild(name);
+    head.appendChild(badge);
+
+    var metrics = document.createElement("div");
+    metrics.className = "si-metrics";
+    [
+      ["AQI", st.aqi],
+      ["PM2.5", st.pm],
+      ["pH", Number(st.ph).toFixed(1)],
+      ["Noise", st.noise + " dB"]
+    ].forEach(function (m) {
+      var chip = document.createElement("span");
+      chip.className = "si-metric";
+      chip.innerHTML = escapeHTML(m[0]) + " <b>" + escapeHTML(m[1]) + "</b>";
+      metrics.appendChild(chip);
+    });
+
+    var actions = document.createElement("div");
+    actions.className = "si-actions";
+
+    var edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "mini-btn";
+    edit.textContent = "Edit";
+    edit.setAttribute("data-action", "edit");
+    edit.setAttribute("aria-label", "Edit " + st.name);
+
+    var del = document.createElement("button");
+    del.type = "button";
+    del.className = "mini-btn danger";
+    del.textContent = "Remove";
+    del.setAttribute("data-action", "remove");
+    del.setAttribute("aria-label", "Remove " + st.name);
+
+    actions.appendChild(edit);
+    actions.appendChild(del);
+
+    li.appendChild(head);
+    li.appendChild(metrics);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function matchesFilter(st) {
+    var okStatus = filter === "all" || statusOf(st.aqi).key === filter;
+    var okText = !query || st.name.toLowerCase().indexOf(query) !== -1;
+    return okStatus && okText;
+  }
+
+  function updateEmpty() {
+    var has = listEl.children.length > 0;
+    emptyEl.hidden = has;
+    if (!has) {
+      emptyEl.textContent = stations.length === 0
+        ? "No stations yet. Add one using the form above."
+        : "No stations match your search or filter.";
+    }
+  }
+
+  function renderList() {
+    listEl.innerHTML = "";                    // clear, then rebuild from the array
+    stations.filter(matchesFilter).forEach(function (st) {
+      listEl.appendChild(buildCard(st));
+    });
+    updateEmpty();
+  }
+
+  /* ---------- rendering: the existing readings table ---------- */
+  function buildRow(st) {
+    var s = statusOf(st.aqi);
+    var tr = document.createElement("tr");
+    tr.setAttribute("data-id", String(st.id));
+
+    var th = document.createElement("th");
+    th.setAttribute("scope", "row");
+    th.textContent = st.name;
+    tr.appendChild(th);
+
+    [st.aqi, st.pm, Number(st.ph).toFixed(1), st.noise].forEach(function (value) {
+      var td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+
+    var tdStatus = document.createElement("td");
+    var pill = document.createElement("span");
+    pill.className = "status " + s.key;
+    pill.textContent = s.label;
+    tdStatus.appendChild(pill);
+    tr.appendChild(tdStatus);
+    return tr;
+  }
+
+  function renderTable() {
+    tbody.innerHTML = "";
+    stations.forEach(function (st) { tbody.appendChild(buildRow(st)); });
+  }
+
+  /* ---------- rendering: summary cards, counters and live alert ---------- */
+  function setCardTone(valueId, tone) {
+    var card = document.getElementById(valueId).closest(".stat-card");
+    card.classList.remove("ok", "warn", "bad");
+    card.classList.add(tone);
+  }
+
+  function updateSummary() {
+    var n = stations.length;
+    var bad = stations.filter(function (s) { return s.aqi > 150; });
+    var loud = stations.filter(function (s) { return s.noise > 75; });
+
+    setText("mgrCount", String(n));
+    setText("mgrBad", String(bad.length));
+
+    if (n === 0) {
+      setText("mgrAvg", "-");
+      setText("statAqi", "-");
+      setText("statPh", "-");
+      document.getElementById("statNoise").textContent = "-";
+      setText("statAlerts", "0");
+      setText("noteAqi", "No stations");
+      setText("notePh", "No stations");
+      setText("noteNoise", "No stations");
+      setText("noteAlerts", "No active alerts");
+      setText("textAqi", "Add a station to see readings.");
+      setText("textPh", "Add a station to see readings.");
+      setText("textNoise", "Add a station to see readings.");
+      setText("textAlerts", "There are no active alerts.");
+      return;
+    }
+
+    var sumAqi = 0, sumPh = 0, sumNoise = 0;
+    stations.forEach(function (s) { sumAqi += s.aqi; sumPh += s.ph; sumNoise += s.noise; });
+    var avgAqi = Math.round(sumAqi / n);
+    var avgPh = sumPh / n;
+    var avgNoise = Math.round(sumNoise / n);
+
+    var worst = stations.reduce(function (a, b) { return b.aqi > a.aqi ? b : a; });
+    var lowPh = stations.reduce(function (a, b) { return b.ph < a.ph ? b : a; });
+    var aqiStatus = statusOf(avgAqi);
+
+    // Manager counters
+    setText("mgrAvg", String(avgAqi));
+
+    // Summary cards (Network summary)
+    setText("statAqi", String(avgAqi));
+    setText("noteAqi", aqiStatus.label + " across " + plural(n, "station"));
+    setCardTone("statAqi", aqiStatus.key === "good" ? "ok" : aqiStatus.key === "moderate" ? "warn" : "bad");
+
+    setText("statPh", avgPh.toFixed(1));
+    setText("notePh", "Lowest is " + lowPh.name + " at " + Number(lowPh.ph).toFixed(1));
+    setCardTone("statPh", avgPh >= 6.5 && avgPh <= 8.5 ? "ok" : "bad");
+
+    // innerHTML is safe here: the value is a number and the markup is fixed
+    document.getElementById("statNoise").innerHTML = avgNoise + "<small>dB</small>";
+    setText("noteNoise", plural(loud.length, "station") + (loud.length === 1 ? " is" : " are") + " above 75 dB");
+    setCardTone("statNoise", loud.length > 0 ? "warn" : "ok");
+
+    setText("statAlerts", String(bad.length));
+    setText("noteAlerts", bad.length ? joinNames(bad.map(function (s) { return s.name; })) : "No active alerts");
+    setCardTone("statAlerts", bad.length ? "bad" : "ok");
+
+    // Text inside the "Show details" panels
+    setText("textAqi", (n - bad.length) + " of " + n + " stations are Good or Moderate. Highest reading: " +
+            worst.name + " (" + worst.aqi + ").");
+    setText("textPh", "Safe drinking water sits near 6.5 to 8.5. Lowest reading: " +
+            lowPh.name + " (" + Number(lowPh.ph).toFixed(1) + ").");
+    setText("textNoise", loud.length
+      ? "Above 75 dB: " + joinNames(loud.map(function (s) { return s.name + " (" + s.noise + ")"; })) + "."
+      : "No station is above the 75 dB level.");
+    setText("textAlerts", bad.length
+      ? "Unhealthy stations are shown in red in the table. Open the Alerts section for advice."
+      : "No station is above AQI 150 right now.");
+  }
+
+  function updateLiveAlert() {
+    var box = document.getElementById("liveAlertText");
+    if (!box) return;
+    if (!stations.length) {
+      box.innerHTML = "<strong>Live alert</strong><br>No stations are being monitored.";
+      return;
+    }
+    var worst = stations.reduce(function (a, b) { return b.aqi > a.aqi ? b : a; });
+    box.innerHTML = worst.aqi > 150
+      ? "<strong>Live alert</strong><br>" + escapeHTML(worst.name) + " AQI is " + worst.aqi + ". Limit outdoor activity."
+      : "<strong>Live alert</strong><br>All stations are below the alert level (highest AQI " + worst.aqi + ").";
+  }
+
+  function stamp() {
+    if (!timeEl) return;
+    var now = new Date();
+    timeEl.setAttribute("datetime", now.toISOString());
+    timeEl.textContent = now.toLocaleString("en-GB", {
+      day: "numeric", month: "short", year: "numeric",
+      hour: "numeric", minute: "2-digit", hour12: true
+    });
+  }
+
+  function renderAll() {
+    renderTable();
+    renderList();
+    updateSummary();
+    updateLiveAlert();
+    // Tell the report form that the station list may have changed
+    document.dispatchEvent(new CustomEvent("stations:changed"));
+  }
+
+  function flash(id, kind) {
+    var card = listEl.querySelector('[data-id="' + id + '"]');
+    var row = tbody.querySelector('[data-id="' + id + '"]');
+    if (card) card.classList.add(kind === "added" ? "is-new" : "is-updated");
+    if (row) row.classList.add("row-flash");
+    setTimeout(function () {
+      if (card) card.classList.remove("is-new", "is-updated");
+      if (row) row.classList.remove("row-flash");
+    }, 1500);
+  }
+
+  /* ---------- activity log ---------- */
+  function logActivity(message) {
+    var empty = logEl.querySelector(".activity-empty");
+    if (empty) empty.remove();
+
+    var li = document.createElement("li");
+    var time = document.createElement("span");
+    time.className = "activity-time";
+    time.textContent = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    var text = document.createElement("span");
+    text.textContent = message;
+    li.appendChild(time);
+    li.appendChild(text);
+    logEl.insertBefore(li, logEl.firstChild);   // newest first
+
+    while (logEl.children.length > 6) logEl.lastElementChild.remove();
+  }
+
+  clearLogBtn.addEventListener("click", function () {
+    logEl.innerHTML = '<li class="activity-empty">No changes yet. Add, edit or remove a station to see it here.</li>';
+  });
+
+  /* ---------- form: validation ---------- */
+  function clearError() {
+    errorEl.textContent = "";
+    Object.keys(inputs).forEach(function (key) {
+      inputs[key].classList.remove("invalid");
+      inputs[key].removeAttribute("aria-invalid");
+    });
+  }
+
+  function fail(input, message) {
+    errorEl.textContent = message;
+    input.classList.add("invalid");
+    input.setAttribute("aria-invalid", "true");
+    input.focus();
+    return null;
+  }
+
+  function readForm() {
+    var name = inputs.name.value.trim();
+    if (!name) return fail(inputs.name, "Enter a station name.");
+
+    var lower = name.toLowerCase();
+    var duplicate = stations.some(function (s) {
+      return s.name.toLowerCase() === lower && s.id !== editingId;
+    });
+    if (duplicate) return fail(inputs.name, name + " is already on the list.");
+
+    var values = { name: name };
+    for (var i = 0; i < RULES.length; i++) {
+      var rule = RULES[i];
+      var input = inputs[rule.key];
+      var raw = input.value.trim();
+      var num = Number(raw);
+      if (raw === "" || isNaN(num) || num < rule.min || num > rule.max) {
+        return fail(input, rule.label + " must be a number from " + rule.min + " to " + rule.max + ".");
+      }
+      values[rule.key] = rule.decimals ? Math.round(num * 10) / 10 : Math.round(num);
+    }
+    return values;
+  }
+
+  // Clear the error as soon as the visitor starts typing again
+  Object.keys(inputs).forEach(function (key) {
+    inputs[key].addEventListener("input", clearError);
+    inputs[key].addEventListener("keydown", function (event) {
+      if (event.key === "Enter") submit();
+      if (event.key === "Escape" && editingId !== null) stopEditing();
+    });
+  });
+
+  /* ---------- add, modify, remove ---------- */
+  function resetFilters() {
+    filter = "all";
+    query = "";
+    searchEl.value = "";
+    filtersEl.querySelectorAll(".chip").forEach(function (chip) {
+      var on = chip.getAttribute("data-filter") === "all";
+      chip.classList.toggle("active", on);
+      chip.setAttribute("aria-pressed", String(on));
+    });
+  }
+
+  function submit() {
+    clearError();
+    var v = readForm();
+    if (!v) return;
+
+    if (editingId === null) {
+      // ADD
+      var st = { id: nextId++, name: v.name, aqi: v.aqi, pm: v.pm, ph: v.ph, noise: v.noise };
+      stations.push(st);
+      if (!matchesFilter(st)) resetFilters();   // make sure the new card is visible
+      save();
+      stamp();
+      renderAll();
+      flash(st.id, "added");
+      logActivity("Added " + st.name + " (AQI " + st.aqi + ")");
+      toast("Station added", st.name + " is now on the list.", "success");
+      clearForm();
+      inputs.name.focus();
+    } else {
+      // MODIFY
+      var idx = findIndex(editingId);
+      if (idx === -1) { stopEditing(); return; }
+      var target = stations[idx];
+      var oldName = target.name;
+      target.name = v.name;
+      target.aqi = v.aqi;
+      target.pm = v.pm;
+      target.ph = v.ph;
+      target.noise = v.noise;
+      var id = target.id;
+      save();
+      stamp();
+      stopEditing();                            // also re-renders
+      flash(id, "updated");
+      logActivity("Updated " + (oldName === v.name ? v.name : oldName + " (now " + v.name + ")") + " (AQI " + v.aqi + ")");
+      toast("Station updated", v.name + " was saved.", "success");
+    }
+  }
+
+  function clearForm() {
+    Object.keys(inputs).forEach(function (key) { inputs[key].value = ""; });
+  }
+
+  function startEdit(id) {
+    var idx = findIndex(id);
+    if (idx === -1) return;
+    var st = stations[idx];
+
+    clearError();
+    editingId = id;
+    inputs.name.value = st.name;
+    inputs.aqi.value = st.aqi;
+    inputs.pm.value = st.pm;
+    inputs.ph.value = Number(st.ph).toFixed(1);
+    inputs.noise.value = st.noise;
+
+    titleEl.textContent = "Edit station: " + st.name;
+    submitBtn.textContent = "Save changes";
+    cancelBtn.hidden = false;
+    form.setAttribute("data-mode", "edit");
+
+    renderList();                               // marks the card being edited
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    inputs.name.focus({ preventScroll: true });
+  }
+
+  function stopEditing() {
+    editingId = null;
+    clearError();
+    clearForm();
+    titleEl.textContent = "Add a station";
+    submitBtn.textContent = "Add station";
+    cancelBtn.hidden = true;
+    form.setAttribute("data-mode", "add");
+    renderAll();
+  }
+
+  function removeStation(id) {
+    var idx = findIndex(id);
+    if (idx === -1) return;
+    var st = stations[idx];
+
+    stations.splice(idx, 1);
+    if (editingId === id) {
+      editingId = null;
+      clearForm();
+      titleEl.textContent = "Add a station";
+      submitBtn.textContent = "Add station";
+      cancelBtn.hidden = true;
+      form.setAttribute("data-mode", "add");
+    }
+    save();
+    stamp();
+    renderTable();
+    updateSummary();
+    updateLiveAlert();
+    logActivity("Removed " + st.name);
+    toast("Station removed", st.name + " was deleted.", "warning");
+
+    // Let the card shrink away first, then take it out of the DOM
+    var card = listEl.querySelector('[data-id="' + id + '"]');
+    if (card) {
+      card.classList.add("leaving");
+      setTimeout(function () {
+        card.remove();
+        updateEmpty();
+      }, 300);
+    } else {
+      updateEmpty();
+    }
+  }
+
+  /* ---------- events ---------- */
+  submitBtn.addEventListener("click", submit);
+  cancelBtn.addEventListener("click", stopEditing);
+
+  // One listener on the list handles every Edit and Remove button (event delegation)
+  listEl.addEventListener("click", function (event) {
+    var btn = event.target.closest("button[data-action]");
+    if (!btn) return;
+    var card = btn.closest(".station-item");
+    var id = Number(card.getAttribute("data-id"));
+    if (btn.getAttribute("data-action") === "edit") startEdit(id);
+    if (btn.getAttribute("data-action") === "remove") removeStation(id);
+  });
+
+  searchEl.addEventListener("input", function () {
+    query = searchEl.value.trim().toLowerCase();
+    renderList();
+  });
+
+  filtersEl.addEventListener("click", function (event) {
+    var chip = event.target.closest(".chip");
+    if (!chip) return;
+    filter = chip.getAttribute("data-filter");
+    filtersEl.querySelectorAll(".chip").forEach(function (c) {
+      var on = c === chip;
+      c.classList.toggle("active", on);
+      c.setAttribute("aria-pressed", String(on));
+    });
+    renderList();
+  });
+
+  // Reset needs two clicks, so it is never triggered by accident
+  var resetTimer = null;
+  function revertResetButton() {
+    resetBtn.classList.remove("confirm");
+    resetBtn.textContent = "Reset to default stations";
+  }
+
+  resetBtn.addEventListener("click", function () {
+    if (!resetBtn.classList.contains("confirm")) {
+      resetBtn.classList.add("confirm");
+      resetBtn.textContent = "Click again to confirm";
+      resetTimer = setTimeout(revertResetButton, 3000);
+      return;
+    }
+    clearTimeout(resetTimer);
+    revertResetButton();
+
+    stations = clone(DEFAULTS);
+    nextId = DEFAULTS.length + 1;
+    resetFilters();
+    save();
+    stamp();
+    stopEditing();                              // also re-renders
+    logActivity("Reset to the 7 default stations");
+    toast("Stations reset", "The default stations are back.", "warning");
+  });
+
+  // First draw from the data
+  renderAll();
+})();
+
+/* =========================================================
+   10. INCIDENT REPORT FORM (validation)
+   The form has the novalidate attribute, so the browser shows
+   no pop-ups of its own. Each field is checked with
+   checkValidity(), the message is written with
+   setCustomValidity(), shown under the field, and the first
+   problem is announced with reportValidity().
+   ========================================================= */
+(function () {
+  var form = document.getElementById("reportForm");
+  if (!form) return;
+
+  var success = document.getElementById("reportSuccess");
+  var formAlert = document.getElementById("formAlert");
+  var again = document.getElementById("reportAnother");
+
+  var fields = Array.prototype.slice.call(form.querySelectorAll("input, select, textarea"));
+  var f = {
+    name:     document.getElementById("rpName"),
+    email:    document.getElementById("rpEmail"),
+    phone:    document.getElementById("rpPhone"),
+    type:     document.getElementById("rpType"),
+    severity: document.getElementById("rpSeverity"),
+    location: document.getElementById("rpLocation"),
+    other:    document.getElementById("rpOther"),
+    date:     document.getElementById("rpDate"),
+    time:     document.getElementById("rpTime"),
+    reading:  document.getElementById("rpReading"),
+    desc:     document.getElementById("rpDesc"),
+    confirm:  document.getElementById("rpConfirm"),
+    updates:  document.getElementById("rpUpdates")
+  };
+  var otherWrap = document.getElementById("rpOtherWrap");
+  var phoneNote = document.getElementById("rpPhoneNote");
+  var counter = document.getElementById("rpDesc-count");
+
+  function toast(title, message, type) {
+    if (window.showToast) window.showToast(title, message, type);
+  }
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function isoDate(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+
+  /* ---------- date limits: today back to 30 days ago ---------- */
+  var today = new Date();
+  var oldest = new Date();
+  oldest.setDate(today.getDate() - 30);
+  f.date.setAttribute("max", isoDate(today));
+  f.date.setAttribute("min", isoDate(oldest));
+
+  /* ---------- station list comes from the Station Manager ---------- */
+  function populateStations() {
+    if (!window.getStationNames) return;
+    var names = window.getStationNames();
+    var current = f.location.value;
+
+    f.location.innerHTML = "";
+    var first = document.createElement("option");
+    first.value = "";
+    first.textContent = "Choose a station";
+    f.location.appendChild(first);
+
+    names.forEach(function (name) {
+      var opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      f.location.appendChild(opt);
+    });
+
+    var other = document.createElement("option");
+    other.value = "__other";
+    other.textContent = "Other location";
+    f.location.appendChild(other);
+
+    // Keep the visitor's choice if that station still exists
+    var stillThere = Array.prototype.some.call(f.location.options, function (o) { return o.value === current; });
+    f.location.value = stillThere ? current : "";
+    if (f.location.classList.contains("touched")) validateField(f.location);
+  }
+
+  /* ---------- messages ---------- */
+  function messageFor(field) {
+    var v = field.validity;
+    var label = field.getAttribute("data-label") || "This field";
+
+    if (v.valueMissing) {
+      if (field.type === "checkbox") return "You must tick this box to send the report.";
+      if (field.tagName === "SELECT") return "Please choose an option.";
+      return label + " is required.";
+    }
+    if (v.typeMismatch) {
+      return field.type === "email" ? "Enter a valid email address, like name@example.com." : "Enter a valid value.";
+    }
+    if (v.tooShort) {
+      return label + " needs at least " + field.minLength + " characters (you have typed " + field.value.length + ").";
+    }
+    if (v.tooLong) {
+      return label + " can have at most " + field.maxLength + " characters.";
+    }
+    if (v.patternMismatch) {
+      return field.getAttribute("data-pattern-msg") || "Please match the format asked for.";
+    }
+    if (v.rangeUnderflow) {
+      return field === f.date
+        ? "Reports can only be filed for the last 30 days."
+        : label + " must be " + field.min + " or more.";
+    }
+    if (v.rangeOverflow) {
+      return field === f.date
+        ? "The date cannot be in the future."
+        : label + " must be " + field.max + " or less.";
+    }
+    if (v.stepMismatch) return label + " must be a whole number.";
+    if (v.badInput) return "Enter a valid value.";
+    return "Please check this field.";
+  }
+
+  // Rules the HTML attributes cannot express
+  function extraRule(field) {
+    if (field === f.desc) {
+      var words = field.value.trim().split(/\s+/).filter(Boolean).length;
+      if (field.value.trim() && words < 4) return "Please describe it in at least 4 words.";
+    }
+    if (field === f.time && f.time.value && f.date.value === isoDate(new Date())) {
+      var now = new Date();
+      if (f.time.value > pad(now.getHours()) + ":" + pad(now.getMinutes())) {
+        return "The time cannot be in the future.";
+      }
+    }
+    return "";
+  }
+
+  function errorBox(field) {
+    return document.getElementById(field.id + "-error");
+  }
+
+  function showError(field, message) {
+    var box = errorBox(field);
+    if (box) box.textContent = message;
+    if (message) field.setAttribute("aria-invalid", "true");
+    else field.removeAttribute("aria-invalid");
+  }
+
+  /* ---------- check one field ---------- */
+  function validateField(field) {
+    field.setCustomValidity("");                 // clear the old message first
+    var message = "";
+    if (!field.checkValidity()) message = messageFor(field);
+    if (!message) message = extraRule(field);
+    field.setCustomValidity(message);            // an empty string means valid
+    showError(field, message);
+    return !message;
+  }
+
+  function touch(field) {
+    field.classList.add("touched");
+  }
+
+  /* ---------- live checking while the visitor fills the form ---------- */
+  fields.forEach(function (field) {
+    field.addEventListener("blur", function () {
+      if (field.required || field.value) {
+        touch(field);
+        validateField(field);
+      }
+    });
+
+    var eventName = (field.type === "checkbox" || field.tagName === "SELECT") ? "change" : "input";
+    field.addEventListener(eventName, function () {
+      if (field.classList.contains("touched")) validateField(field);
+    });
+  });
+
+  // Selects and checkboxes are "touched" as soon as they change
+  [f.type, f.severity, f.location, f.confirm].forEach(function (field) {
+    field.addEventListener("change", function () {
+      touch(field);
+      validateField(field);
+    });
+  });
+
+  /* ---------- fields that depend on other fields ---------- */
+  // "Other location" shows its own text box
+  f.location.addEventListener("change", function () {
+    var other = f.location.value === "__other";
+    otherWrap.hidden = !other;
+    f.other.required = other;
+    if (!other) {
+      f.other.value = "";
+      f.other.classList.remove("touched");
+      f.other.setCustomValidity("");
+      showError(f.other, "");
+    } else {
+      f.other.focus();
+    }
+  });
+
+  // High severity needs a phone number so an officer can call back
+  f.severity.addEventListener("change", function () {
+    var high = f.severity.value === "high";
+    f.phone.required = high;
+    phoneNote.textContent = high ? "(required for High severity)" : "(optional)";
+    if (f.phone.classList.contains("touched")) validateField(f.phone);
+    if (!high && !f.phone.value) {
+      f.phone.classList.remove("touched");
+      f.phone.setCustomValidity("");
+      showError(f.phone, "");
+    }
+  });
+
+  // Date and time are checked together
+  f.date.addEventListener("change", function () {
+    if (f.time.classList.contains("touched")) validateField(f.time);
+  });
+
+  // Live character counter for the description
+  f.desc.addEventListener("input", function () {
+    var len = f.desc.value.length;
+    var max = f.desc.maxLength;
+    counter.textContent = len + " / " + max;
+    counter.classList.toggle("near", len >= max * 0.9 && len < max);
+    counter.classList.toggle("max", len >= max);
+  });
+
+  /* ---------- submit ---------- */
+  function validateAll() {
+    var bad = 0;
+    fields.forEach(function (field) {
+      if (field.disabled || field.closest("[hidden]")) return;
+      touch(field);
+      if (!validateField(field)) bad++;
+    });
+    return bad;
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();                       // never reload the page
+
+    var bad = validateAll();
+
+    if (!form.checkValidity()) {
+      formAlert.textContent = "Please fix " + bad + (bad === 1 ? " field" : " fields") + " marked in red and try again.";
+      formAlert.hidden = false;
+      var first = form.querySelector(":invalid");
+      if (first) {
+        first.focus();
+        first.reportValidity();                   // shows the message next to the first problem
+      }
+      return;
+    }
+
+    formAlert.hidden = true;
+    showSuccess();
+  });
+
+  /* ---------- success ---------- */
+  function addSummary(list, key, value) {
+    if (!value) return;
+    var li = document.createElement("li");
+    var k = document.createElement("span");
+    k.className = "summary-key";
+    k.textContent = key;
+    var v = document.createElement("span");
+    v.className = "summary-value";
+    v.textContent = value;
+    li.appendChild(k);
+    li.appendChild(v);
+    list.appendChild(li);
+  }
+
+  function showSuccess() {
+    var ref = "EMP-" + new Date().getFullYear() + "-" + String(Math.floor(1000 + Math.random() * 9000));
+    var list = document.getElementById("successSummary");
+    list.innerHTML = "";
+
+    var where = f.location.value === "__other" ? f.other.value.trim() : f.location.value;
+    var when = new Date(f.date.value + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    if (f.time.value) when += ", " + f.time.value;
+
+    addSummary(list, "Incident", f.type.options[f.type.selectedIndex].text);
+    addSummary(list, "Severity", f.severity.options[f.severity.selectedIndex].text.split(":")[0]);
+    addSummary(list, "Location", where);
+    addSummary(list, "When", when);
+    addSummary(list, "AQI measured", f.reading.value);
+    addSummary(list, "Description", f.desc.value.trim());
+    addSummary(list, "Contact", f.email.value.trim() + (f.phone.value ? " / " + f.phone.value : ""));
+
+    document.getElementById("successName").textContent = f.name.value.trim();
+    document.getElementById("successRef").textContent = ref;
+
+    form.hidden = true;
+    success.hidden = false;
+    success.scrollIntoView({ behavior: "smooth", block: "start" });
+    success.focus({ preventScroll: true });
+    toast("Report submitted", "Reference " + ref, "success");
+
+    form.reset();                                 // the reset handler below tidies the rest
+  }
+
+  again.addEventListener("click", function () {
+    success.hidden = true;
+    form.hidden = false;
+    f.name.focus();
+  });
+
+  /* ---------- reset: clear every message and state ---------- */
+  form.addEventListener("reset", function () {
+    // wait one tick so the browser has emptied the fields first
+    setTimeout(function () {
+      fields.forEach(function (field) {
+        field.classList.remove("touched");
+        field.setCustomValidity("");
+        showError(field, "");
+      });
+      formAlert.hidden = true;
+      otherWrap.hidden = true;
+      f.other.required = false;
+      f.phone.required = false;
+      phoneNote.textContent = "(optional)";
+      counter.textContent = "0 / " + f.desc.maxLength;
+      counter.classList.remove("near", "max");
+    }, 0);
+  });
+
+  /* ---------- start ---------- */
+  populateStations();
+  document.addEventListener("stations:changed", populateStations);
+})();
+
+
+/* =========================================================
+   11. LIVE API DATA (Practicum 12)
+   fetch() asks an endpoint for JSON. async/await waits for the
+   reply, try/catch handles failures and finally always switches
+   the loading state off. createElement(), appendChild() and
+   textContent build the cards and table rows from the data.
+   ========================================================= */
+(function () {
+  var refreshBtn = document.getElementById("apiRefresh");
+  var statusEl = document.getElementById("apiStatus");
+  if (!refreshBtn || !statusEl) return;
+
+  // Endpoint 1: live air quality from the free Open-Meteo API (no key needed)
+  var AIR_CITIES = [
+    { name: "Coimbatore",     lat: 11.0168, lon: 76.9558 },
+    { name: "Chennai",        lat: 13.0827, lon: 80.2707 },
+    { name: "Madurai",        lat: 9.9252,  lon: 78.1198 },
+    { name: "Tiruchirappalli", lat: 10.7905, lon: 78.7047 },
+    { name: "Salem",          lat: 11.6643, lon: 78.1460 },
+    { name: "Tiruppur",       lat: 11.1085, lon: 77.3411 },
+    { name: "Tirunelveli",    lat: 8.7139,  lon: 77.7567 }
+  ];
+  var AIR_URL = "https://air-quality-api.open-meteo.com/v1/air-quality" +
+    "?latitude=" + AIR_CITIES.map(function (c) { return c.lat; }).join(",") +
+    "&longitude=" + AIR_CITIES.map(function (c) { return c.lon; }).join(",") +
+    "&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,sulphur_dioxide,ozone&timezone=auto";
+
+  // Endpoint 2: water quality JSON. The data sits inside this file so the page also
+  // works in online editors. fetch() reads it from a Blob URL exactly like a real endpoint.
+  // To use a real endpoint later, replace WATER_URL with its web address.
+  var WATER_DATA = {
+    "source": "Sample water quality dataset (replace with your own endpoint)",
+    "updated": "22 Nov 2026, 8:00 AM",
+    "sites": [
+      { "name": "Perur Ghat",       "waterBody": "Noyyal River",     "ph": 7.4, "turbidity": 3.2,  "dissolvedOxygen": 7.1 },
+      { "name": "Ukkadam",          "waterBody": "Ukkadam Lake",     "ph": 7.0, "turbidity": 6.8,  "dissolvedOxygen": 5.6 },
+      { "name": "Valankulam",       "waterBody": "Valankulam Lake",  "ph": 6.9, "turbidity": 4.1,  "dissolvedOxygen": 6.4 },
+      { "name": "Singanallur",      "waterBody": "Singanallur Lake", "ph": 6.4, "turbidity": 12.5, "dissolvedOxygen": 4.3 },
+      { "name": "Mettupalayam",     "waterBody": "Bhavani River",    "ph": 7.6, "turbidity": 2.4,  "dissolvedOxygen": 7.8 },
+      { "name": "Tiruppur Bridge",  "waterBody": "Noyyal River",     "ph": 6.3, "turbidity": 14.2, "dissolvedOxygen": 3.6 },
+      { "name": "Kausika Crossing", "waterBody": "Kausika River",    "ph": 7.2, "turbidity": 9.6,  "dissolvedOxygen": 5.2 }
+    ]
+  };
+  var WATER_URL = URL.createObjectURL(new Blob([JSON.stringify(WATER_DATA)], { type: "application/json" }));
+  var TIMEOUT = 10000;                       // give up after 10 seconds
+
+  /* ---------- small helpers ---------- */
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function num(value, decimals) {
+    return (value === null || value === undefined || isNaN(value)) ? "-" : Number(value).toFixed(decimals || 0);
+  }
+
+  function pill(key, label) {
+    return el("span", "status " + key, label);
+  }
+
+  function card(tone, label, value, note) {
+    var box = el("div", "stat-card " + tone);
+    box.appendChild(el("span", "stat-label", label));
+    box.appendChild(el("span", "stat-value", value));
+    box.appendChild(el("span", "stat-note", note));
+    return box;
+  }
+
+  function addRow(tbody, cells) {
+    var tr = document.createElement("tr");
+    cells.forEach(function (cell, i) {
+      var node = document.createElement(i === 0 ? "th" : "td");
+      if (i === 0) node.setAttribute("scope", "row");
+      if (cell && cell.nodeType) node.appendChild(cell);
+      else node.textContent = cell;
+      tr.appendChild(node);
+    });
+    tbody.appendChild(tr);
+  }
+
+  function addAlert(box, text, clear) {
+    box.appendChild(el("p", clear ? "clear" : "", text));
+  }
+
+  function airStatus(aqi) {
+    if (aqi <= 50)  return { key: "good",      label: "Good" };
+    if (aqi <= 150) return { key: "moderate",  label: "Moderate" };
+    return { key: "unhealthy", label: "Unhealthy" };
+  }
+
+  // Water: each reading outside its safe range counts as one problem
+  function waterStatus(site) {
+    var problems = 0;
+    if (site.ph < 6.5 || site.ph > 8.5) problems++;
+    if (site.turbidity > 10) problems++;
+    if (site.dissolvedOxygen < 5) problems++;
+    if (problems === 0) return { key: "good",      label: "Safe",    problems: 0 };
+    if (problems === 1) return { key: "moderate",  label: "Caution", problems: 1 };
+    return { key: "unhealthy", label: "Unsafe", problems: problems };
+  }
+
+  /* ---------- panels ---------- */
+  var panels = [
+    { id: "air",   url: AIR_URL,   render: renderAir,   hint: "" },
+    { id: "water", url: WATER_URL, render: renderWater, hint: "" }
+  ];
+
+  panels.forEach(function (p) {
+    p.panel = document.getElementById(p.id + "Panel");
+    p.loader = document.getElementById(p.id + "Loader");
+    p.error = document.getElementById(p.id + "Error");
+    p.errorText = document.getElementById(p.id + "ErrorText");
+    p.cards = document.getElementById(p.id + "Cards");
+    p.alerts = document.getElementById(p.id + "Alerts");
+    p.table = document.getElementById(p.id + "Table");
+    p.body = document.getElementById(p.id + "Body");
+    p.meta = document.getElementById(p.id + "Meta");
+  });
+
+  // state is "loading", "error" or "ready": shows only the matching parts of the panel
+  function show(p, state) {
+    p.loader.hidden = state !== "loading";
+    p.error.hidden = state !== "error";
+    [p.cards, p.alerts, p.table, p.meta].forEach(function (part) {
+      part.hidden = state !== "ready";
+    });
+    p.panel.setAttribute("aria-busy", String(state === "loading"));
+  }
+
+  function describe(error, p) {
+    if (error.name === "AbortError") return "The request took longer than 10 seconds and was stopped. Please try again.";
+    if (error instanceof SyntaxError) return "The server replied, but the data was not valid JSON.";
+    if (error instanceof TypeError) return "The data could not be reached. Check your internet connection and try again." + p.hint;
+    return error.message;
+  }
+
+  /* ---------- render: air quality ---------- */
+  function renderAir(data, p) {
+    var list = Array.isArray(data) ? data : [data];
+    if (!list.length || !list[0] || !list[0].current) {
+      throw new Error("The air quality reply did not contain any readings.");
+    }
+
+    var rows = list.map(function (item, i) {
+      return { name: AIR_CITIES[i] ? AIR_CITIES[i].name : "Location " + (i + 1), c: item.current || {} };
+    });
+    var valid = rows.filter(function (r) { return r.c.us_aqi !== null && r.c.us_aqi !== undefined; });
+
+    p.body.textContent = "";
+    p.cards.textContent = "";
+    p.alerts.textContent = "";
+
+    rows.forEach(function (r) {
+      var cell = r.c.us_aqi === null || r.c.us_aqi === undefined
+        ? "No data"
+        : pill(airStatus(r.c.us_aqi).key, airStatus(r.c.us_aqi).label);
+      addRow(p.body, [r.name, num(r.c.us_aqi), num(r.c.pm2_5, 1), num(r.c.pm10, 1),
+                      num(r.c.nitrogen_dioxide, 1), num(r.c.sulphur_dioxide, 1), num(r.c.ozone, 1), cell]);
+    });
+
+    if (!valid.length) throw new Error("The air quality reply had no AQI values.");
+
+    var total = 0;
+    valid.forEach(function (r) { total += r.c.us_aqi; });
+    var avg = Math.round(total / valid.length);
+    var worst = valid.reduce(function (a, b) { return b.c.us_aqi > a.c.us_aqi ? b : a; });
+    var best = valid.reduce(function (a, b) { return b.c.us_aqi < a.c.us_aqi ? b : a; });
+    var bad = valid.filter(function (r) { return r.c.us_aqi > 150; });
+    var tone = { good: "ok", moderate: "warn", unhealthy: "bad" };
+
+    p.cards.appendChild(card(tone[airStatus(avg).key], "Average AQI", String(avg), airStatus(avg).label + " across " + valid.length + " cities"));
+    p.cards.appendChild(card(tone[airStatus(worst.c.us_aqi).key], "Highest AQI", String(worst.c.us_aqi), worst.name));
+    p.cards.appendChild(card("ok", "Cleanest air", String(best.c.us_aqi), best.name));
+    p.cards.appendChild(card(bad.length ? "bad" : "ok", "Active alerts", String(bad.length), bad.length ? "AQI above 150" : "No city above 150"));
+
+    bad.forEach(function (r) {
+      addAlert(p.alerts, "Air quality alert: " + r.name + " AQI is " + r.c.us_aqi + ". Limit outdoor activity.");
+    });
+    if (!bad.length) addAlert(p.alerts, "No air quality alerts right now. Every city is at or below AQI 150.", true);
+
+    p.meta.textContent = "Source: Open-Meteo Air Quality API. Pollutants in µg/m³. Data time: " + (list[0].current.time || "not given") + ".";
+  }
+
+  /* ---------- render: water quality ---------- */
+  function renderWater(data, p) {
+    if (!data || !Array.isArray(data.sites) || !data.sites.length) {
+      throw new Error("The water quality reply did not contain any sites.");
+    }
+
+    p.body.textContent = "";
+    p.cards.textContent = "";
+    p.alerts.textContent = "";
+
+    var attention = [];
+    var phTotal = 0;
+    var lowest = data.sites[0];
+
+    data.sites.forEach(function (site) {
+      var s = waterStatus(site);
+      phTotal += site.ph;
+      if (site.dissolvedOxygen < lowest.dissolvedOxygen) lowest = site;
+      if (s.problems > 0) attention.push({ site: site, status: s });
+      addRow(p.body, [site.name, site.waterBody, num(site.ph, 1), num(site.turbidity, 1),
+                      num(site.dissolvedOxygen, 1), pill(s.key, s.label)]);
+    });
+
+    var avgPh = phTotal / data.sites.length;
+    var unsafe = attention.filter(function (a) { return a.status.key === "unhealthy"; });
+
+    p.cards.appendChild(card("ok", "Sites sampled", String(data.sites.length), "Rivers and lakes"));
+    p.cards.appendChild(card(avgPh >= 6.5 && avgPh <= 8.5 ? "ok" : "bad", "Average pH", avgPh.toFixed(1), "Safe range is 6.5 to 8.5"));
+    p.cards.appendChild(card(lowest.dissolvedOxygen < 5 ? "warn" : "ok", "Lowest oxygen", num(lowest.dissolvedOxygen, 1), lowest.name));
+    p.cards.appendChild(card(unsafe.length ? "bad" : attention.length ? "warn" : "ok", "Need attention", String(attention.length), unsafe.length + " unsafe"));
+
+    attention.forEach(function (a) {
+      addAlert(p.alerts, "Water alert: " + a.site.name + " is marked " + a.status.label.toLowerCase() +
+               " (pH " + num(a.site.ph, 1) + ", turbidity " + num(a.site.turbidity, 1) + " NTU, oxygen " + num(a.site.dissolvedOxygen, 1) + " mg/L).");
+    });
+    if (!attention.length) addAlert(p.alerts, "No water quality alerts. Every site is within its safe range.", true);
+
+    p.meta.textContent = "Source: " + (data.source || "water quality endpoint") + ". Last sampled: " + (data.updated || "not given") + ".";
+  }
+
+  /* ---------- fetch one endpoint ---------- */
+  async function load(p) {
+    show(p, "loading");
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, TIMEOUT);
+
+    try {
+      var response = await fetch(p.url, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error("The server replied with " + response.status + (response.statusText ? " " + response.statusText : "") + ".");
+      }
+      var data = await response.json();
+      p.render(data, p);
+      show(p, "ready");
+      return true;
+    } catch (error) {
+      p.errorText.textContent = describe(error, p);
+      show(p, "error");
+      return false;
+    } finally {
+      clearTimeout(timer);                       // runs whether the fetch worked or failed
+      p.panel.setAttribute("aria-busy", "false");
+    }
+  }
+
+  function clock() {
+    return new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+
+  async function loadAll() {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "Loading...";
+    statusEl.textContent = "Fetching data...";
+
+    try {
+      var results = await Promise.all(panels.map(load));
+      var ok = results.filter(Boolean).length;
+
+      if (ok === panels.length) {
+        statusEl.textContent = "All data loaded at " + clock() + ".";
+        if (window.showToast) window.showToast("Data loaded", "Air and water readings are up to date.", "success");
+      } else if (ok > 0) {
+        statusEl.textContent = "Loaded " + ok + " of " + panels.length + " data sources. See the message below.";
+        if (window.showToast) window.showToast("Partly loaded", "One data source could not be reached.", "warning");
+      } else {
+        statusEl.textContent = "No data could be loaded.";
+        if (window.showToast) window.showToast("Load failed", "Check your connection and try again.", "error");
+      }
+    } finally {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = "Refresh data";
+    }
+  }
+
+  /* ---------- events ---------- */
+  refreshBtn.addEventListener("click", loadAll);
+
+  // One listener handles both "Try again" buttons
+  document.getElementById("live").addEventListener("click", async function (event) {
+    var btn = event.target.closest("[data-retry]");
+    if (!btn) return;
+    var p = panels.filter(function (item) { return item.id === btn.getAttribute("data-retry"); })[0];
+    if (!p) return;
+    btn.disabled = true;
+    var ok = await load(p);
+    btn.disabled = false;
+    if (ok) statusEl.textContent = "Reloaded at " + clock() + ".";
+  });
+
+  loadAll();                                     // first load when the page opens
+})();
+
+
+/* =========================================================
+   12. TASK MANAGER (Practicum 13)
+   CRUD: Create (push), Read (render), Update (edit + status),
+   Delete (filter + remove). The tasks array is saved to Local
+   Storage with JSON.stringify() and read back with JSON.parse().
+   ========================================================= */
+(function () {
+  var form = document.getElementById("taskForm");
+  var listEl = document.getElementById("taskList");
+  var tbody = document.getElementById("taskBody");
+  if (!form || !listEl || !tbody) return;
+
+  var f = {
+    title:    document.getElementById("tkTitle"),
+    station:  document.getElementById("tkStation"),
+    priority: document.getElementById("tkPriority"),
+    due:      document.getElementById("tkDue"),
+    status:   document.getElementById("tkStatus"),
+    notes:    document.getElementById("tkNotes")
+  };
+  var submitBtn = document.getElementById("tkSubmit");
+  var cancelBtn = document.getElementById("tkCancel");
+  var errorEl = document.getElementById("tkError");
+  var formTitle = document.getElementById("tkFormTitle");
+  var searchEl = document.getElementById("tkSearch");
+  var filterEl = document.getElementById("tkFilter");
+  var emptyEl = document.getElementById("tkEmpty");
+  var clearDoneBtn = document.getElementById("tkClearDone");
+
+  var KEY = "emp-tasks-v1";
+  var STATUS = { todo: "To do", progress: "In progress", done: "Done" };
+  var PRIORITY = { low: "Low", medium: "Medium", high: "High" };
+
+  /* ---------- helpers ---------- */
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function isoDate(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function offset(days) { var d = new Date(); d.setDate(d.getDate() + days); return isoDate(d); }
+
+  function niceDate(iso) {
+    if (!iso) return "No due date";
+    return new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  function toast(title, message, type) {
+    if (window.showToast) window.showToast(title, message, type);
+  }
+
+  function isOverdue(t) {
+    return !!t.due && t.due < isoDate(new Date()) && t.status !== "done";
+  }
+
+  /* ---------- Local Storage ---------- */
+  function defaults() {
+    return [
+      { id: 1, title: "Calibrate PM2.5 sensor",         station: "Highway Junction", priority: "high",   due: offset(1),  status: "todo",     notes: "Readings have drifted high since last week." },
+      { id: 2, title: "Collect river water sample",      station: "Riverside",        priority: "medium", due: offset(2),  status: "progress", notes: "Test pH and dissolved oxygen on site." },
+      { id: 3, title: "Inspect stack emission monitor",  station: "Industrial Zone",  priority: "high",   due: offset(-1), status: "todo",     notes: "AQI crossed 150 this month." },
+      { id: 4, title: "Upload the hourly report",        station: "General",          priority: "low",    due: offset(0),  status: "done",     notes: "" }
+    ];
+  }
+
+  function valid(t) {
+    return t && typeof t.id === "number" && typeof t.title === "string" &&
+           STATUS[t.status] && PRIORITY[t.priority];
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+    if (raw === null) return defaults();           // first visit: sample tasks
+    try {
+      var saved = JSON.parse(raw);
+      if (Array.isArray(saved) && saved.every(valid)) return saved;
+    } catch (e) { /* damaged data: start again */ }
+    return defaults();
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(tasks)); } catch (e) { /* ignore */ }
+  }
+
+  var tasks = load();
+  var nextId = 1;
+  var editingId = null;
+  var query = "";
+  var filter = "all";
+  tasks.forEach(function (t) { if (t.id >= nextId) nextId = t.id + 1; });
+  save();
+
+  function findTask(id) {
+    return tasks.find(function (t) { return t.id === id; });
+  }
+
+  /* ---------- READ: render the list, table and counters ---------- */
+  function matches(t) {
+    var okStatus = filter === "all" || t.status === filter;
+    var text = (t.title + " " + t.station + " " + t.notes).toLowerCase();
+    return okStatus && (!query || text.indexOf(query) !== -1);
+  }
+
+  function pill(className, label) {
+    return el("span", "status " + className, label);
+  }
+
+  function buildItem(t) {
+    var li = el("li", "task-item " + t.status);
+    li.setAttribute("data-id", String(t.id));
+    if (t.id === editingId) li.classList.add("editing");
+
+    var head = el("div", "tk-head");
+    head.appendChild(el("span", "tk-title", t.title));
+    var badges = el("div", "tk-badges");
+    badges.appendChild(pill("pr-" + t.priority, PRIORITY[t.priority]));
+    if (isOverdue(t)) badges.appendChild(pill("overdue", "Overdue"));
+    head.appendChild(badges);
+    li.appendChild(head);
+
+    li.appendChild(el("p", "tk-meta", t.station + " | Due: " + niceDate(t.due)));
+    if (t.notes) li.appendChild(el("p", "tk-notes", t.notes));
+
+    var actions = el("div", "tk-actions");
+
+    // UPDATE status without opening the form
+    var select = el("select", "tk-status-select");
+    select.setAttribute("data-action", "status");
+    select.setAttribute("aria-label", "Status of " + t.title);
+    Object.keys(STATUS).forEach(function (key) {
+      var option = document.createElement("option");
+      option.value = key;
+      option.textContent = STATUS[key];
+      if (key === t.status) option.selected = true;
+      select.appendChild(option);
+    });
+    actions.appendChild(select);
+
+    var edit = el("button", "mini-btn", "Edit");
+    edit.type = "button";
+    edit.setAttribute("data-action", "edit");
+    edit.setAttribute("aria-label", "Edit " + t.title);
+    actions.appendChild(edit);
+
+    var del = el("button", "mini-btn danger", "Delete");
+    del.type = "button";
+    del.setAttribute("data-action", "delete");
+    del.setAttribute("aria-label", "Delete " + t.title);
+    actions.appendChild(del);
+
+    li.appendChild(actions);
+    return li;
+  }
+
+  function renderList() {
+    listEl.innerHTML = "";
+    tasks.filter(matches).forEach(function (t) { listEl.appendChild(buildItem(t)); });
+    updateEmpty();
+  }
+
+  function updateEmpty() {
+    var has = listEl.children.length > 0;
+    emptyEl.hidden = has;
+    if (!has) {
+      emptyEl.textContent = tasks.length === 0
+        ? "No tasks yet. Add one using the form above."
+        : "No tasks match your search or filter.";
+    }
+  }
+
+  function renderTable() {
+    tbody.innerHTML = "";
+    tasks.slice().sort(function (a, b) {
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return a.due < b.due ? -1 : a.due > b.due ? 1 : 0;
+    }).forEach(function (t) {
+      var tr = document.createElement("tr");
+      var th = el("th", "", t.title);
+      th.setAttribute("scope", "row");
+      tr.appendChild(th);
+      tr.appendChild(el("td", "", t.station));
+
+      var tdPriority = document.createElement("td");
+      tdPriority.appendChild(pill("pr-" + t.priority, PRIORITY[t.priority]));
+      tr.appendChild(tdPriority);
+
+      tr.appendChild(el("td", isOverdue(t) ? "tk-due-late" : "", niceDate(t.due) + (isOverdue(t) ? " (overdue)" : "")));
+
+      var tdStatus = document.createElement("td");
+      tdStatus.appendChild(pill("st-" + t.status, STATUS[t.status]));
+      tr.appendChild(tdStatus);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderCounts() {
+    function count(status) { return tasks.filter(function (t) { return t.status === status; }).length; }
+    document.getElementById("tkTotal").textContent = String(tasks.length);
+    document.getElementById("tkTodo").textContent = String(count("todo"));
+    document.getElementById("tkProgress").textContent = String(count("progress"));
+    document.getElementById("tkDone").textContent = String(count("done"));
+  }
+
+  function renderAll() {
+    renderList();
+    renderTable();
+    renderCounts();
+  }
+
+  /* ---------- form helpers ---------- */
+  function clearError() {
+    errorEl.textContent = "";
+    f.title.classList.remove("invalid");
+    f.title.removeAttribute("aria-invalid");
+  }
+
+  function readForm() {
+    var title = f.title.value.trim();
+    if (title.length < 3) {
+      errorEl.textContent = "The task title needs at least 3 characters.";
+      f.title.classList.add("invalid");
+      f.title.setAttribute("aria-invalid", "true");
+      f.title.focus();
+      return null;
+    }
+    return {
+      title: title,
+      station: f.station.value,
+      priority: f.priority.value,
+      due: f.due.value,
+      status: f.status.value,
+      notes: f.notes.value.trim()
+    };
+  }
+
+  function resetForm() {
+    form.reset();
+    f.priority.value = "medium";
+  }
+
+  function stopEditing() {
+    editingId = null;
+    clearError();
+    resetForm();
+    formTitle.textContent = "Add a task";
+    submitBtn.textContent = "Add task";
+    cancelBtn.hidden = true;
+    form.setAttribute("data-mode", "add");
+    renderAll();
+  }
+
+  /* ---------- CREATE and UPDATE ---------- */
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    clearError();
+    var v = readForm();
+    if (!v) return;
+
+    if (editingId === null) {
+      var task = { id: nextId++, title: v.title, station: v.station, priority: v.priority,
+                   due: v.due, status: v.status, notes: v.notes };
+      tasks.push(task);                              // CREATE
+      filter = "all";
+      query = "";
+      filterEl.value = "all";
+      searchEl.value = "";
+      save();
+      renderAll();
+      var card = listEl.querySelector('[data-id="' + task.id + '"]');
+      if (card) card.classList.add("is-new");
+      resetForm();
+      f.title.focus();
+      toast("Task added", task.title, "success");
+    } else {
+      var target = findTask(editingId);              // UPDATE
+      if (!target) { stopEditing(); return; }
+      target.title = v.title;
+      target.station = v.station;
+      target.priority = v.priority;
+      target.due = v.due;
+      target.status = v.status;
+      target.notes = v.notes;
+      save();
+      stopEditing();
+      toast("Task updated", v.title + " was saved.", "success");
+    }
+  });
+
+  f.title.addEventListener("input", clearError);
+  cancelBtn.addEventListener("click", stopEditing);
+
+  function startEdit(id) {
+    var t = findTask(id);
+    if (!t) return;
+    clearError();
+    editingId = id;
+    f.title.value = t.title;
+    f.station.value = t.station;
+    f.priority.value = t.priority;
+    f.due.value = t.due;
+    f.status.value = t.status;
+    f.notes.value = t.notes;
+    formTitle.textContent = "Edit task: " + t.title;
+    submitBtn.textContent = "Save changes";
+    cancelBtn.hidden = false;
+    form.setAttribute("data-mode", "edit");
+    renderList();                                    // marks the card being edited
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    f.title.focus({ preventScroll: true });
+  }
+
+  /* ---------- DELETE ---------- */
+  function deleteTask(id) {
+    var t = findTask(id);
+    if (!t) return;
+    if (!window.confirm('Delete the task "' + t.title + '"?')) return;
+
+    tasks = tasks.filter(function (item) { return item.id !== id; });
+    save();
+    if (editingId === id) stopEditing();
+    renderTable();
+    renderCounts();
+
+    var card = listEl.querySelector('[data-id="' + id + '"]');
+    if (card) {
+      card.classList.add("leaving");                 // shrink away, then remove from the page
+      setTimeout(function () { card.remove(); updateEmpty(); }, 300);
+    } else {
+      updateEmpty();
+    }
+    toast("Task deleted", t.title, "warning");
+  }
+
+  /* ---------- events (one listener each for the whole list) ---------- */
+  listEl.addEventListener("click", function (event) {
+    var btn = event.target.closest("button[data-action]");
+    if (!btn) return;
+    var id = Number(btn.closest(".task-item").getAttribute("data-id"));
+    if (btn.getAttribute("data-action") === "edit") startEdit(id);
+    if (btn.getAttribute("data-action") === "delete") deleteTask(id);
+  });
+
+  listEl.addEventListener("change", function (event) {
+    var select = event.target.closest("select[data-action='status']");
+    if (!select) return;
+    var id = Number(select.closest(".task-item").getAttribute("data-id"));
+    var t = findTask(id);
+    if (!t) return;
+    t.status = select.value;                         // UPDATE the status
+    save();
+    renderAll();
+    toast("Status updated", t.title + " is now " + STATUS[t.status].toLowerCase() + ".", "success");
+  });
+
+  searchEl.addEventListener("input", function () {
+    query = searchEl.value.trim().toLowerCase();
+    renderList();
+  });
+
+  filterEl.addEventListener("change", function () {
+    filter = filterEl.value;
+    renderList();
+  });
+
+  clearDoneBtn.addEventListener("click", function () {
+    var done = tasks.filter(function (t) { return t.status === "done"; }).length;
+    if (!done) { toast("Nothing to clear", "No tasks are marked as done.", "warning"); return; }
+    tasks = tasks.filter(function (t) { return t.status !== "done"; });
+    if (editingId !== null && !findTask(editingId)) editingId = null;
+    save();
+    stopEditing();
+    toast("Completed tasks cleared", done + (done === 1 ? " task was" : " tasks were") + " removed.", "warning");
+  });
+
+  renderAll();                                       // first draw from Local Storage
+})();
+
+
+/* =========================================================
+   13. INTERACTIVE TOOLS (Practicum 14)
+   Part A: Pollutant Explorer (search + filter + accordion)
+   Part B: Station Comparison Tool
+   ========================================================= */
+(function () {
+  var listEl = document.querySelector("#pxList");
+  if (!listEl) return;
+
+  var searchEl = document.querySelector("#pxSearch");
+  var categoryEl = document.querySelector("#pxCategory");
+  var resetBtn = document.querySelector("#pxReset");
+  var countEl = document.querySelector("#pxCount");
+  var emptyEl = document.querySelector("#pxEmpty");
+
+  var COLORS = { air: "#B7791F", water: "#135F6B", noise: "#12303F" };
+  var TYPE_LABEL = { air: "Air", water: "Water", noise: "Noise" };
+
+  var INDICATORS = [
+    { id: "pm25", short: "PM2.5", name: "Fine dust", category: "air",
+      source: "Vehicle exhaust, burning of waste and wood, factory smoke.",
+      effect: "Particles this small reach deep into the lungs and can enter the blood.",
+      limit: "15 µg/m³ over 24 hours (WHO 2021)." },
+    { id: "pm10", short: "PM10", name: "Coarse dust", category: "air",
+      source: "Road dust, construction sites, mining and quarrying.",
+      effect: "Irritates the nose, throat and eyes and can make asthma worse.",
+      limit: "45 µg/m³ over 24 hours (WHO 2021)." },
+    { id: "no2", short: "NO2", name: "Nitrogen dioxide", category: "air",
+      source: "Diesel engines, power plants and other burning of fuel.",
+      effect: "Inflames the airways and raises the risk of breathing problems in children.",
+      limit: "25 µg/m³ over 24 hours (WHO 2021)." },
+    { id: "so2", short: "SO2", name: "Sulphur dioxide", category: "air",
+      source: "Burning coal and oil in factories and power stations.",
+      effect: "Causes coughing and wheezing and is a main cause of acid rain.",
+      limit: "40 µg/m³ over 24 hours (WHO 2021)." },
+    { id: "o3", short: "O3", name: "Ground-level ozone", category: "air",
+      source: "Forms in sunlight when traffic and factory gases react together.",
+      effect: "Causes chest pain and coughing, and harms crops.",
+      limit: "100 µg/m³ over 8 hours (WHO 2021)." },
+    { id: "ph", short: "pH", name: "Water acidity", category: "water",
+      source: "Industrial discharge, acid rain and mining run-off change the pH.",
+      effect: "Water that is too acidic or too basic harms fish and can corrode pipes.",
+      limit: "6.5 to 8.5 for drinking water." },
+    { id: "turb", short: "NTU", name: "Turbidity (cloudy water)", category: "water",
+      source: "Soil wash-off, sewage and construction work.",
+      effect: "Cloudy water can hide bacteria and makes disinfection harder.",
+      limit: "Below 5 NTU, and ideally below 1 NTU." },
+    { id: "do", short: "DO", name: "Dissolved oxygen", category: "water",
+      source: "Falls when sewage or fertiliser run-off feeds algae that use up oxygen.",
+      effect: "Low oxygen suffocates fish and other water life.",
+      limit: "5 mg/L or more for healthy aquatic life." },
+    { id: "noise", short: "dB", name: "Noise level", category: "noise",
+      source: "Traffic, factories, ports and construction.",
+      effect: "Long exposure disturbs sleep and raises stress and heart risk.",
+      limit: "53 dB average for road traffic (WHO 2018)." }
+  ];
+
+  var category = "all";
+  var query = "";
+
+  function icon(text, color) {
+    var size = text.length > 3 ? 16 : 20;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">' +
+      '<rect width="64" height="64" rx="14" fill="' + color + '"/>' +
+      '<text x="32" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="' + size +
+      '" font-weight="700" fill="#fff">' + text + '</text></svg>';
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function addRow(dl, term, text) {
+    dl.appendChild(el("dt", "", term));
+    dl.appendChild(el("dd", "", text));
+  }
+
+  function buildItem(item) {
+    var li = el("li", "px-item " + item.category);
+
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+
+    var img = document.createElement("img");
+    img.src = icon(item.short, COLORS[item.category]);
+    img.alt = "";
+    img.width = 48;
+    img.height = 48;
+
+    var title = el("span", "");
+    title.appendChild(el("span", "px-name", item.name));
+    title.appendChild(el("span", "px-sub", TYPE_LABEL[item.category] + " | " + item.short));
+
+    summary.appendChild(img);
+    summary.appendChild(title);
+    details.appendChild(summary);
+
+    var body = el("div", "px-body");
+    var dl = document.createElement("dl");
+    addRow(dl, "Main sources", item.source);
+    addRow(dl, "Health and nature", item.effect);
+    addRow(dl, "Safe limit", item.limit);
+    body.appendChild(dl);
+    details.appendChild(body);
+    li.appendChild(details);
+
+    // Accordion: opening one card closes the others
+    details.addEventListener("toggle", function () {
+      li.classList.toggle("is-open", details.open);
+      if (!details.open) return;
+      listEl.querySelectorAll("details").forEach(function (other) {
+        if (other !== details && other.open) other.open = false;
+      });
+    });
+    return li;
+  }
+
+  function render() {
+    var shown = INDICATORS.filter(function (item) {
+      var okType = category === "all" || item.category === category;
+      var text = (item.name + " " + item.short + " " + item.source + " " + item.effect).toLowerCase();
+      return okType && (!query || text.indexOf(query) !== -1);
+    });
+
+    listEl.innerHTML = "";
+    shown.forEach(function (item) { listEl.appendChild(buildItem(item)); });
+
+    countEl.textContent = "Showing " + shown.length + " of " + INDICATORS.length + " indicators";
+    emptyEl.hidden = shown.length > 0;
+  }
+
+  searchEl.addEventListener("input", function () {
+    query = searchEl.value.trim().toLowerCase();
+    render();
+  });
+
+  categoryEl.addEventListener("change", function () {
+    category = categoryEl.value;
+    render();
+  });
+
+  resetBtn.addEventListener("click", function () {
+    query = "";
+    category = "all";
+    searchEl.value = "";
+    categoryEl.value = "all";
+    render();
+    searchEl.focus();
+  });
+
+  render();
+
+  /* ---------- Part B: Station Comparison Tool ---------- */
+  var selA = document.querySelector("#cmpA");
+  var selB = document.querySelector("#cmpB");
+  var swapBtn = document.querySelector("#cmpSwap");
+  var bodyEl = document.querySelector("#cmpBody");
+  var verdictEl = document.querySelector("#cmpVerdict");
+  var captionEl = document.querySelector("#cmpCaption");
+  if (!selA || !selB || !bodyEl || !window.getStations) return;
+
+  function statusOf(aqi) {
+    return aqi <= 50 ? "Good" : aqi <= 150 ? "Moderate" : "Unhealthy";
+  }
+
+  // better: "low" means the smaller number wins, "ph" means closest to 7.0 wins
+  var MEASURES = [
+    { label: "Air quality index (AQI)", get: function (s) { return s.aqi; },   show: function (s) { return String(s.aqi); },            better: "low" },
+    { label: "PM2.5 (µg/m³)",           get: function (s) { return s.pm; },    show: function (s) { return String(s.pm); },             better: "low" },
+    { label: "Water pH",                get: function (s) { return Math.abs(s.ph - 7); }, show: function (s) { return Number(s.ph).toFixed(1); }, better: "low" },
+    { label: "Noise (dB)",              get: function (s) { return s.noise; }, show: function (s) { return String(s.noise); },          better: "low" }
+  ];
+
+  function fillSelect(select, stations, keep, fallbackIndex) {
+    select.innerHTML = "";
+    stations.forEach(function (st) {
+      var option = document.createElement("option");
+      option.value = String(st.id);
+      option.textContent = st.name;
+      select.appendChild(option);
+    });
+    var still = stations.find(function (st) { return String(st.id) === keep; });
+    if (still) select.value = keep;
+    else if (stations[fallbackIndex]) select.value = String(stations[fallbackIndex].id);
+  }
+
+  function compare() {
+    var stations = window.getStations();
+    var a = stations.find(function (st) { return String(st.id) === selA.value; });
+    var b = stations.find(function (st) { return String(st.id) === selB.value; });
+    bodyEl.innerHTML = "";
+
+    if (!a || !b) {
+      captionEl.textContent = "Select two stations";
+      verdictEl.textContent = "Add at least two stations in the Station Manager to compare them.";
+      return;
+    }
+
+    document.querySelector("#cmpHeadA").textContent = a.name;
+    document.querySelector("#cmpHeadB").textContent = b.name;
+    captionEl.textContent = a.name + " compared with " + b.name;
+
+    var winsA = 0, winsB = 0;
+    MEASURES.forEach(function (m) {
+      var tr = document.createElement("tr");
+      var th = el("th", "", m.label);
+      th.setAttribute("scope", "row");
+      var tdA = el("td", "", m.show(a));
+      var tdB = el("td", "", m.show(b));
+      if (m.get(a) < m.get(b)) { tdA.classList.add("cmp-win"); winsA++; }
+      if (m.get(b) < m.get(a)) { tdB.classList.add("cmp-win"); winsB++; }
+      tr.appendChild(th);
+      tr.appendChild(tdA);
+      tr.appendChild(tdB);
+      bodyEl.appendChild(tr);
+    });
+
+    var trStatus = document.createElement("tr");
+    var thStatus = el("th", "", "Air status");
+    thStatus.setAttribute("scope", "row");
+    trStatus.appendChild(thStatus);
+    trStatus.appendChild(el("td", "", statusOf(a.aqi)));
+    trStatus.appendChild(el("td", "", statusOf(b.aqi)));
+    bodyEl.appendChild(trStatus);
+
+    if (a.id === b.id) verdictEl.textContent = "You picked the same station twice. Choose a different one to compare.";
+    else if (winsA === winsB) verdictEl.textContent = a.name + " and " + b.name + " are evenly matched across the four readings.";
+    else verdictEl.textContent = (winsA > winsB ? a.name : b.name) + " has the healthier readings, winning " +
+                                 Math.max(winsA, winsB) + " of 4 measures.";
+  }
+
+  function refreshStations() {
+    var stations = window.getStations();
+    fillSelect(selA, stations, selA.value, 0);
+    fillSelect(selB, stations, selB.value, 1);
+    compare();
+  }
+
+  selA.addEventListener("change", compare);
+  selB.addEventListener("change", compare);
+
+  swapBtn.addEventListener("click", function () {
+    var keep = selA.value;
+    selA.value = selB.value;
+    selB.value = keep;
+    compare();
+  });
+
+  // The Station Manager announces every change, so the tool stays up to date
+  document.addEventListener("stations:changed", refreshStations);
+  refreshStations();
+})();

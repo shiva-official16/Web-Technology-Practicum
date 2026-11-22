@@ -1,0 +1,336 @@
+/* =========================================================
+   1. MOBILE MENU
+   Opens and closes the dropdown. The CSS only shows the
+   button and dropdown on screens 600px wide or narrower.
+   ========================================================= */
+(function () {
+  var nav = document.getElementById("siteNav");
+  var button = document.getElementById("navToggle");
+  var list = document.getElementById("navList");
+
+  if (!nav || !button || !list) return;
+
+  function setOpen(open) {
+    nav.classList.toggle("open", open);
+    button.setAttribute("aria-expanded", String(open));
+  }
+
+  // Button toggles the menu
+  button.addEventListener("click", function () {
+    setOpen(!nav.classList.contains("open"));
+  });
+
+  // Choosing a link closes the menu
+  list.addEventListener("click", function (event) {
+    if (event.target.closest("a")) setOpen(false);
+  });
+
+  // Clicking outside the menu closes it
+  document.addEventListener("click", function (event) {
+    if (nav.classList.contains("open") && !nav.contains(event.target)) setOpen(false);
+  });
+
+  // Escape closes it and returns focus to the button
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && nav.classList.contains("open")) {
+      setOpen(false);
+      button.focus();
+    }
+  });
+
+  // Growing past the mobile breakpoint resets the menu
+  var wide = window.matchMedia("(min-width: 601px)");
+  wide.addEventListener("change", function (event) {
+    if (event.matches) setOpen(false);
+  });
+})();
+
+/* =========================================================
+   2. LIVE WINDOW WIDTH
+   Shows the current width next to the breakpoint name.
+   ========================================================= */
+(function () {
+  var output = document.getElementById("bpWidth");
+  if (!output) return;
+
+  function show() {
+    output.textContent = "(" + window.innerWidth + " px wide)";
+  }
+
+  show();
+  window.addEventListener("resize", show);
+})();
+
+/* =========================================================
+   3. POSITIONING PLAYGROUND
+   Switches the position value of the demo box and explains it.
+   Animated: the box pops and the note fades when the value changes.
+   ========================================================= */
+(function () {
+  var box = document.getElementById("pgBox");
+  var code = document.getElementById("pgCode");
+  var note = document.getElementById("pgNote");
+  var radios = document.querySelectorAll('input[name="pos"]');
+
+  if (!box || !code || !note || !radios.length) return;
+
+  var info = {
+    static: {
+      css: "position: static;\ntop: 24px; left: 48px;  /* ignored */",
+      text: "Static: the box stays in the normal flow and the offsets do nothing."
+    },
+    relative: {
+      css: "position: relative;\ntop: 24px; left: 48px;",
+      text: "Relative: the box moves 24px down and 48px right of its normal spot, but the gap it left behind is kept."
+    },
+    absolute: {
+      css: "position: absolute;\ntop: 24px; left: 48px;",
+      text: "Absolute: the box leaves the flow (the readings below move up) and is placed against the grey area, which is its positioned parent."
+    },
+    fixed: {
+      css: "position: fixed;\ntop: 90px; right: 20px;",
+      text: "Fixed: the box jumps out to the browser window and stays there while you scroll the page. Switch back to another value to bring it home."
+    },
+    sticky: {
+      css: "position: sticky;\ntop: 0;",
+      text: "Sticky: scroll inside the grey area. The box scrolls normally until it reaches the top edge, then it sticks."
+    }
+  };
+
+  function apply(value) {
+    // reset everything the previous choice may have set
+    box.style.position = value;
+    box.style.top = "24px";
+    box.style.left = "48px";
+    box.style.right = "auto";
+
+    if (value === "fixed") {
+      box.style.top = "90px";
+      box.style.left = "auto";
+      box.style.right = "20px";
+    } else if (value === "sticky") {
+      box.style.top = "0";
+      box.style.left = "auto";
+    }
+
+    code.querySelector("code").textContent = info[value].css;
+
+    // Animate: the note fades out and back in, the box pops
+    note.classList.add("fading");
+    setTimeout(function () {
+      note.textContent = info[value].text;
+      note.classList.remove("fading");
+    }, 150);
+
+    box.classList.remove("pop");
+    void box.offsetWidth;            // restart the animation
+    box.classList.add("pop");
+  }
+
+  radios.forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      if (radio.checked) apply(radio.value);
+    });
+  });
+
+  apply("static");
+  box.classList.remove("pop");       // no pop on first load
+})();
+
+/* =========================================================
+   4. DISMISS THE FIXED LIVE ALERT
+   Slides away first, then is hidden.
+   ========================================================= */
+(function () {
+  var alertBox = document.getElementById("fixedAlert");
+  var closeBtn = document.getElementById("fixedAlertClose");
+
+  if (!alertBox || !closeBtn) return;
+
+  closeBtn.addEventListener("click", function () {
+    alertBox.classList.add("closing");        // starts the slide-out animation
+    setTimeout(function () {
+      alertBox.hidden = true;                 // hidden once the animation has finished
+      alertBox.classList.remove("closing");
+    }, 350);
+  });
+})();
+
+/* =========================================================
+   5. NOTIFICATIONS (TOASTS)
+   showToast() builds a card, it slides in (CSS animation),
+   waits, then slides out and is removed.
+   ========================================================= */
+(function () {
+  var stack = document.getElementById("toastStack");
+  if (!stack) return;
+
+  var DISPLAY_TIME = 3500;   // how long a toast stays on screen
+  var EXIT_TIME = 350;       // matches the slideOutRight animation
+
+  function removeToast(toast) {
+    if (!toast.parentNode) return;
+    toast.classList.add("hide");
+    setTimeout(function () {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, EXIT_TIME);
+  }
+
+  window.showToast = function (title, message, type) {
+    var toast = document.createElement("div");
+    toast.className = "toast " + (type || "success");
+
+    var strong = document.createElement("strong");
+    strong.textContent = title;
+    var text = document.createElement("span");
+    text.textContent = message;
+
+    var close = document.createElement("button");
+    close.type = "button";
+    close.className = "toast-close";
+    close.setAttribute("aria-label", "Dismiss notification");
+    close.innerHTML = "&times;";
+
+    toast.appendChild(strong);
+    toast.appendChild(text);
+    toast.appendChild(close);
+    stack.appendChild(toast);
+
+    var timer = setTimeout(function () { removeToast(toast); }, DISPLAY_TIME);
+
+    close.addEventListener("click", function () {
+      clearTimeout(timer);
+      removeToast(toast);
+    });
+
+    // Keep at most 3 toasts on screen
+    while (stack.children.length > 3) stack.removeChild(stack.firstChild);
+  };
+
+  // Demo buttons in the Animations section
+  var messages = {
+    success: ["Saved", "Your settings were saved.", "success"],
+    warning: ["Warning", "Industrial Zone AQI is above 150.", "warning"],
+    error:   ["Error", "Could not reach the Harbour Docks station.", "error"]
+  };
+
+  document.querySelectorAll("[data-toast]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var m = messages[btn.dataset.toast];
+      if (m) window.showToast(m[0], m[1], m[2]);
+    });
+  });
+})();
+
+/* =========================================================
+   6. STATION CARDS: OPEN AND CLOSE DETAILS
+   The button toggles .expanded, CSS animates the height.
+   ========================================================= */
+(function () {
+  var buttons = document.querySelectorAll(".card-toggle");
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var card = btn.closest(".stat-card");
+      var open = card.classList.toggle("expanded");
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Hide details" : "Show details";
+    });
+  });
+})();
+
+/* =========================================================
+   7. GALLERY: INFORMATION CARD OVER THE PHOTO
+   ========================================================= */
+(function () {
+  var gallery = document.querySelector(".gallery");
+  if (!gallery) return;
+
+  function setOpen(frame, open) {
+    frame.classList.toggle("info-open", open);
+    var btn = frame.querySelector(".info-btn");
+    if (btn) btn.setAttribute("aria-expanded", String(open));
+  }
+
+  gallery.addEventListener("click", function (event) {
+    var btn = event.target.closest(".info-btn");
+    if (!btn) return;
+    var frame = btn.closest(".gallery-frame");
+    setOpen(frame, !frame.classList.contains("info-open"));
+  });
+
+  // Escape closes any open information card
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    gallery.querySelectorAll(".info-open").forEach(function (frame) {
+      setOpen(frame, false);
+    });
+  });
+})();
+
+/* =========================================================
+   8. ALERT CARD: SUBSCRIBE, SAFETY ADVICE, MARK AS READ
+   ========================================================= */
+(function () {
+  var subscribe = document.getElementById("subscribeBtn");
+  var adviceBtn = document.getElementById("adviceToggle");
+  var advice = document.getElementById("advicePanel");
+  var readBtn = document.getElementById("markRead");
+  var alertCard = document.querySelector("article.alert");
+
+  // Subscribe: loading spinner, then success state and a notification
+  if (subscribe) {
+    var label = subscribe.querySelector(".btn-label");
+    var busy = false;
+
+    subscribe.addEventListener("click", function () {
+      if (busy) return;
+
+      // Already subscribed: the next click unsubscribes
+      if (subscribe.classList.contains("done")) {
+        subscribe.classList.remove("done");
+        subscribe.setAttribute("aria-pressed", "false");
+        label.textContent = "Subscribe to alerts";
+        if (window.showToast) window.showToast("Unsubscribed", "You will no longer get alert updates.", "warning");
+        return;
+      }
+
+      busy = true;
+      subscribe.classList.add("loading");
+      subscribe.disabled = true;
+      label.textContent = "Subscribing...";
+
+      setTimeout(function () {
+        subscribe.classList.remove("loading");
+        subscribe.classList.add("done");
+        subscribe.disabled = false;
+        subscribe.setAttribute("aria-pressed", "true");
+        label.textContent = "Subscribed";
+        busy = false;
+        if (window.showToast) window.showToast("Subscribed", "You will get Industrial Zone alerts.", "success");
+      }, 1500);
+    });
+  }
+
+  // Safety advice: open and close a content section
+  if (adviceBtn && advice) {
+    adviceBtn.addEventListener("click", function () {
+      var open = advice.classList.toggle("open");
+      adviceBtn.setAttribute("aria-expanded", String(open));
+      adviceBtn.textContent = open ? "Hide safety advice" : "Show safety advice";
+    });
+  }
+
+  // Mark as read: the card changes colour and the ribbon slides away
+  if (readBtn && alertCard) {
+    readBtn.addEventListener("click", function () {
+      var read = alertCard.classList.toggle("is-read");
+      readBtn.classList.toggle("active", read);
+      readBtn.setAttribute("aria-pressed", String(read));
+      readBtn.textContent = read ? "Marked as read" : "Mark as read";
+      if (read && window.showToast) {
+        window.showToast("Marked as read", "This alert is now in your read list.", "success");
+      }
+    });
+  }
+})();

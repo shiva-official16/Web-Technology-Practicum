@@ -1,0 +1,140 @@
+/* =========================================================
+   1. MOBILE MENU
+   Opens and closes the dropdown. The CSS only shows the
+   button and dropdown on screens 600px wide or narrower.
+   ========================================================= */
+(function () {
+  var nav = document.getElementById("siteNav");
+  var button = document.getElementById("navToggle");
+  var list = document.getElementById("navList");
+
+  if (!nav || !button || !list) return;
+
+  function setOpen(open) {
+    nav.classList.toggle("open", open);
+    button.setAttribute("aria-expanded", String(open));
+  }
+
+  // Button toggles the menu
+  button.addEventListener("click", function () {
+    setOpen(!nav.classList.contains("open"));
+  });
+
+  // Choosing a link closes the menu
+  list.addEventListener("click", function (event) {
+    if (event.target.closest("a")) setOpen(false);
+  });
+
+  // Clicking outside the menu closes it
+  document.addEventListener("click", function (event) {
+    if (nav.classList.contains("open") && !nav.contains(event.target)) setOpen(false);
+  });
+
+  // Escape closes it and returns focus to the button
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && nav.classList.contains("open")) {
+      setOpen(false);
+      button.focus();
+    }
+  });
+
+  // Growing past the mobile breakpoint resets the menu
+  var wide = window.matchMedia("(min-width: 601px)");
+  wide.addEventListener("change", function (event) {
+    if (event.matches) setOpen(false);
+  });
+})();
+
+/* =========================================================
+   2. LIVE WINDOW WIDTH
+   Shows the current width next to the breakpoint name.
+   ========================================================= */
+(function () {
+  var output = document.getElementById("bpWidth");
+  if (!output) return;
+
+  function show() {
+    output.textContent = "(" + window.innerWidth + " px wide)";
+  }
+
+  show();
+  window.addEventListener("resize", show);
+})();
+
+/* =========================================================
+   3. POSITIONING PLAYGROUND
+   Switches the position value of the demo box and explains it.
+   ========================================================= */
+(function () {
+  var box = document.getElementById("pgBox");
+  var code = document.getElementById("pgCode");
+  var note = document.getElementById("pgNote");
+  var radios = document.querySelectorAll('input[name="pos"]');
+
+  if (!box || !code || !note || !radios.length) return;
+
+  var info = {
+    static: {
+      css: "position: static;\ntop: 24px; left: 48px;  /* ignored */",
+      text: "Static: the box stays in the normal flow and the offsets do nothing."
+    },
+    relative: {
+      css: "position: relative;\ntop: 24px; left: 48px;",
+      text: "Relative: the box moves 24px down and 48px right of its normal spot, but the gap it left behind is kept."
+    },
+    absolute: {
+      css: "position: absolute;\ntop: 24px; left: 48px;",
+      text: "Absolute: the box leaves the flow (the readings below move up) and is placed against the grey area, which is its positioned parent."
+    },
+    fixed: {
+      css: "position: fixed;\ntop: 90px; right: 20px;",
+      text: "Fixed: the box jumps out to the browser window and stays there while you scroll the page. Switch back to another value to bring it home."
+    },
+    sticky: {
+      css: "position: sticky;\ntop: 0;",
+      text: "Sticky: scroll inside the grey area. The box scrolls normally until it reaches the top edge, then it sticks."
+    }
+  };
+
+  function apply(value) {
+    // reset everything the previous choice may have set
+    box.style.position = value;
+    box.style.top = "24px";
+    box.style.left = "48px";
+    box.style.right = "auto";
+
+    if (value === "fixed") {
+      box.style.top = "90px";
+      box.style.left = "auto";
+      box.style.right = "20px";
+    } else if (value === "sticky") {
+      box.style.top = "0";
+      box.style.left = "auto";
+    }
+
+    code.querySelector("code").textContent = info[value].css;
+    note.textContent = info[value].text;
+  }
+
+  radios.forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      if (radio.checked) apply(radio.value);
+    });
+  });
+
+  apply("static");
+})();
+
+/* =========================================================
+   4. DISMISS THE FIXED LIVE ALERT
+   ========================================================= */
+(function () {
+  var alertBox = document.getElementById("fixedAlert");
+  var closeBtn = document.getElementById("fixedAlertClose");
+
+  if (!alertBox || !closeBtn) return;
+
+  closeBtn.addEventListener("click", function () {
+    alertBox.hidden = true;
+  });
+})();

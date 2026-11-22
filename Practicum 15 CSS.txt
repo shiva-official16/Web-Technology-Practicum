@@ -1,0 +1,3391 @@
+/* =========================================================
+   1. DESIGN TOKENS
+   ========================================================= */
+:root {
+  --ink:        #12303F;
+  --ink-soft:   #35505E;
+  --water:      #1B7F8E;
+  --water-dark: #135F6B;
+  --leaf:       #2F8F5B;
+  --amber:      #B7791F;
+  --alert:      #C0392B;
+  --mist:       #E8F0F3;
+  --paper:      #FFFFFF;
+  --line:       #D3E0E6;
+  --radius:     12px;
+  --shadow:     0 2px 10px rgba(18, 48, 63, 0.08);
+  --nav-height: 56px;
+}
+
+/* =========================================================
+   2. RESET + BOX MODEL
+   ========================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  background-color: var(--mist);
+}
+
+/* Text for screen readers only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   3. HEADER
+   position: relative  -> anchor for the absolute chip
+   position: absolute  -> "Updated every hour" chip (::after)
+   ========================================================= */
+header#top {
+  position: relative;
+  text-align: center;
+  padding: 3.5rem 1.5rem 3rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ink) 0%, #1A4D5E 55%, var(--water) 100%);
+}
+
+header#top h1 {
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+header#top p {
+  max-width: 36rem;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  color: #D4E8EE;
+}
+
+header#top::after {
+  content: "Updated every hour";
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  padding: 0.25rem 0.8rem;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   4. NAVIGATION
+   position: sticky -> stays at the top of the window
+   Base (desktop): centred row of links, menu bar hidden
+   ========================================================= */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: var(--nav-height);
+  background-color: var(--paper);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.nav-bar {
+  display: none;                    /* only shown on mobile */
+}
+
+nav ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  list-style: none;
+}
+
+nav li {
+  flex: 0 0 auto;
+}
+
+nav a {
+  display: block;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+nav a:hover,
+nav a:focus-visible {
+  background-color: var(--water);
+  color: #fff;
+}
+
+/* Menu button (three lines built from one span and its two pseudo-elements) */
+.nav-title {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.bars,
+.bars::before,
+.bars::after {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--ink);
+  transition: transform 0.2s, top 0.2s, background-color 0.2s;
+}
+
+.bars {
+  position: relative;
+}
+
+.bars::before,
+.bars::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.bars::before { top: -7px; }
+.bars::after  { top: 7px; }
+
+nav.open .bars {
+  background-color: transparent;
+}
+
+nav.open .bars::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+nav.open .bars::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+html:not(.js) .nav-toggle {
+  display: none;                    /* no JavaScript: the list stays open, so no button */
+}
+
+/* =========================================================
+   5. PAGE LAYOUT
+   ========================================================= */
+main {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 1rem;
+}
+
+main > section {
+  scroll-margin-top: calc(var(--nav-height) + 1rem);
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* About: text and photo side by side on desktop */
+.about-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.about-layout figure {
+  margin: 0;
+}
+
+/* =========================================================
+   6. TYPOGRAPHY
+   ========================================================= */
+h2 {
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.6rem;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  color: var(--ink);
+  border-bottom: 3px solid var(--water);
+}
+
+h3 {
+  margin: 1.75rem 0 0.7rem;
+  font-size: 1.15rem;
+  color: var(--water-dark);
+}
+
+p {
+  margin: 0 0 1rem;
+  max-width: 70ch;
+}
+
+a {
+  color: var(--water-dark);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: 2px;
+}
+
+code {
+  padding: 0.1rem 0.4rem;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  color: var(--ink);
+  background-color: var(--mist);
+  border-radius: 4px;
+}
+
+/* =========================================================
+   7. FIGURES AND IMAGES
+   ========================================================= */
+figure {
+  margin: 1.5rem 0;
+  padding: 0.75rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+figure img,
+figure iframe,
+figure video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background-color: #CBDCE3;
+}
+
+figure img {
+  max-width: 600px;
+  margin: 0 auto;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+figure img:hover {
+  transform: scale(1.02);
+}
+
+figure iframe {
+  height: 350px;
+  border: 0;
+}
+
+figure video {
+  max-width: 720px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+}
+
+figcaption {
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 0.88rem;
+  font-style: italic;
+  color: #5B7482;
+}
+
+.figure-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.figure-row figure {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------
+   7b. IMAGE FRAME + BADGE
+   position: relative -> the frame is the anchor
+   position: absolute -> the badge sits on the photo
+   --------------------------------------------------------- */
+.media-frame {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow: hidden;            /* keeps the zoom-on-hover inside the frame */
+  border-radius: 8px;
+}
+
+.media-tag {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 999px;
+  background-color: var(--ink);
+  pointer-events: none;        /* clicks and hover pass through to the image */
+}
+
+.tag-live,
+.tag-live::before { background-color: var(--alert); }
+
+.tag-live {
+  padding-left: 1.6rem;
+}
+
+.tag-live::before {                /* absolute dot inside an absolute badge */
+  content: "";
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: -0.25rem;
+  background-color: #fff;
+  border-radius: 50%;
+}
+
+.tag-water { background-color: var(--water-dark); }
+.tag-air   { background-color: var(--amber); }
+
+/* =========================================================
+   8. LISTS AND DEFINITIONS
+   ========================================================= */
+#indicators ul {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#indicators ul li {
+  padding: 0.9rem 1rem;
+  background-color: var(--mist);
+  border-left: 5px solid var(--water);
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#indicators ul li:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+ol {
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ol li {
+  counter-increment: step;
+  position: relative;               /* anchor for the absolute number */
+  margin-bottom: 0.7rem;
+  padding: 0.6rem 1rem 0.6rem 3.2rem;
+  background-color: var(--mist);
+  border-radius: 8px;
+}
+
+ol li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.8rem;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  background-color: var(--water);
+  border-radius: 50%;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 0;
+}
+
+dl > div,
+dt,
+dd {
+  margin: 0;
+}
+
+dt {
+  padding: 0.7rem 1rem 0.2rem;
+  font-weight: 700;
+  color: var(--ink);
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+dd {
+  padding: 0 1rem 0.8rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+/* =========================================================
+   9. SUMMARY CARDS + AQI SCALE
+   ========================================================= */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 1rem 1.1rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--water);
+  border-radius: var(--radius);
+}
+
+.stat-card.ok   { border-top-color: var(--leaf); }
+.stat-card.warn { border-top-color: var(--amber); }
+.stat-card.bad  { border-top-color: var(--alert); }
+
+.stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--water-dark);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.stat-value small {
+  margin-left: 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.stat-note {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #5B7482;
+}
+
+/* position: relative -> container, position: absolute -> bar, pins and end labels */
+.aqi-scale {
+  position: relative;
+  height: 7.5rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.aqi-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1rem;
+  margin-top: -0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    var(--leaf)  0 16.6%,
+    #D4A72C      16.6% 33.3%,
+    #E8883A      33.3% 50%,
+    var(--alert) 50% 66.6%,
+    #8E3B8F      66.6% 83.3%,
+    #6B1F3A      83.3% 100%);
+}
+
+.aqi-pin {
+  position: absolute;
+  left: var(--pos);
+  transform: translateX(-50%);
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #fff;
+  background-color: var(--ink);
+  border-radius: 6px;
+}
+
+.aqi-pin b {
+  margin-left: 0.25rem;
+}
+
+.aqi-pin::after {                   /* little stem that points at the bar */
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 0.9rem;
+  margin-left: -1px;
+  background-color: var(--ink);
+}
+
+.pin-up   { top: 0.2rem; }
+.pin-down { bottom: 0.2rem; }
+.pin-up::after   { top: 100%; }
+.pin-down::after { bottom: 100%; }
+
+.aqi-end {
+  position: absolute;
+  top: 50%;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: #5B7482;
+}
+
+.end-left  { left: 0; }
+.end-right { right: 0; }
+
+/* =========================================================
+   10. TABLES
+   position: sticky -> header row (top) and first column (left)
+   The scroll box lets wide tables work on narrow screens.
+   ========================================================= */
+.table-scroll {
+  max-height: 20rem;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  min-width: 36rem;                 /* forces sideways scrolling on narrow screens */
+  border-collapse: separate;        /* sticky cells keep their borders */
+  border-spacing: 0;
+}
+
+caption {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+  background-color: var(--paper);
+}
+
+th,
+td {
+  padding: 0.85rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: #fff;
+  background-color: var(--ink);
+  border-bottom: 0;
+}
+
+thead th:first-child {              /* top-left corner sticks both ways */
+  left: 0;
+  z-index: 3;
+}
+
+tbody tr {
+  background-color: var(--paper);
+  transition: background-color 0.2s;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #F4F8FA;
+}
+
+tbody tr:hover {
+  background-color: #D9ECF0;
+}
+
+tbody th[scope="row"] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left;
+  color: var(--ink);
+  background-color: inherit;        /* takes the row colour so text never shows through */
+  border-right: 1px solid var(--line);
+}
+
+tfoot td {
+  text-align: right;
+  font-size: 0.88rem;
+  color: #5B7482;
+  border-bottom: 0;
+  background-color: var(--paper);
+}
+
+.status {
+  display: inline-block;
+  min-width: 6.5rem;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 999px;
+}
+
+.status.good      { background-color: var(--leaf); }
+.status.moderate  { background-color: var(--amber); }
+.status.unhealthy { background-color: var(--alert); }
+
+/* reference tables need no height limit */
+.table-plain {
+  max-height: none;
+}
+
+.table-plain table {
+  min-width: 40rem;
+}
+
+.compare td {
+  text-align: left;
+}
+
+.compare tbody th[scope="row"] {
+  white-space: nowrap;
+}
+
+/* =========================================================
+   11. MEDIA SECTION
+   ========================================================= */
+audio {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+}
+
+#media figure > figcaption:first-child {
+  margin: 0 0 0.6rem;
+  font-style: normal;
+  font-weight: 600;
+  text-align: left;
+  color: var(--ink);
+}
+
+details {
+  padding: 0.75rem 1rem;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--water-dark);
+}
+
+summary:hover {
+  color: var(--ink);
+}
+
+details p {
+  margin: 0.75rem 0 0;
+}
+
+/* =========================================================
+   12. IMAGE GALLERY (CSS Grid)
+   ========================================================= */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* Each card is a flex column so captions of different lengths still line up */
+.gallery-item {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.gallery-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Consistent dimensions: every photo is cropped to the same 4:3 box */
+.gallery-item img {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 0;
+  transition: transform 0.35s ease;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.04);
+}
+
+.gallery-tag {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--ink);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.gallery-tag.tag-air       { background-color: var(--amber); }
+.gallery-tag.tag-water     { background-color: var(--water-dark); }
+.gallery-tag.tag-pollution { background-color: var(--alert); }
+.gallery-tag.tag-noise     { background-color: var(--ink); }
+
+.gallery-item figcaption {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.92rem;
+  font-style: normal;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.gallery-item figcaption strong {
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+.gallery-meta {
+  margin-top: auto;                 /* pushes the meta line to the card bottom */
+  padding-top: 0.6rem;
+  font-size: 0.82rem;
+  color: #5B7482;
+  border-top: 1px solid var(--line);
+}
+
+/* =========================================================
+   13. ALERTS
+   position: relative -> article is the anchor
+   position: absolute -> "New" ribbon
+   ========================================================= */
+article {
+  position: relative;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--leaf);
+  border-radius: var(--radius);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+article:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+article h3 {
+  margin-top: 0;
+}
+
+article.alert {
+  background-color: #FDF0EE;
+  border-color: #F1C9C3;
+  border-left-color: var(--alert);
+}
+
+article.alert h3 {
+  color: var(--alert);
+}
+
+article time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5B7482;
+}
+
+.ribbon {
+  position: absolute;
+  top: -1px;
+  right: 1.25rem;
+  padding: 0.25rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--alert);
+  border-radius: 0 0 8px 8px;
+}
+
+aside {
+  padding: 1rem 1.25rem;
+  text-align: center;
+  background-color: #E3F2F5;
+  border: 2px dashed var(--water);
+  border-radius: var(--radius);
+}
+
+aside p {
+  max-width: none;
+  margin: 0;
+}
+
+/* =========================================================
+   14. POSITIONING SECTION
+   ========================================================= */
+.pos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* cards in this grid are articles: switch off the lift effect */
+.pos-card {
+  margin: 0;
+  padding: 1.1rem;
+  border-left-width: 1px;
+  border-top: 5px solid var(--water);
+}
+
+.pos-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.pos-card h4 {
+  margin: 0 0 0.7rem;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.pos-card p {
+  margin-bottom: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.pos-use {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+
+/* demo area: always a positioned container */
+.pos-demo {
+  position: relative;
+  height: 10.5rem;
+  margin-bottom: 0.9rem;
+  padding: 0.5rem;
+  overflow: hidden;
+  background-color: var(--paper);
+  border: 2px dashed var(--water);
+  border-radius: 8px;
+}
+
+.pos-block {
+  margin-bottom: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--ink);
+  background-color: #CFE3E8;
+  border-radius: 6px;
+}
+
+.pos-target {
+  color: #fff;
+  background-color: var(--water-dark);
+}
+
+.t-relative {
+  position: relative;
+  top: 8px;
+  left: 24px;
+}
+
+.t-absolute {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  max-width: 70%;
+}
+
+/* fixed simulation: the chip stays while the track scrolls */
+.pos-viewport {
+  padding: 0;
+  border-style: solid;
+  border-color: var(--ink);
+}
+
+.scroll-track {
+  padding: 0.5rem;
+  animation: drift 6s ease-in-out infinite alternate;
+}
+
+.fixed-chip {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  margin: 0;
+  box-shadow: 0 2px 6px rgba(18, 48, 63, 0.35);
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-7rem); }
+}
+
+/* real sticky demo */
+.pos-scroll {
+  padding: 0;
+  overflow-y: auto;
+}
+
+.pos-scroll .pos-block {
+  margin: 0.4rem 0.5rem;
+}
+
+.sticky-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--water-dark);
+}
+
+/* Playground */
+.playground {
+  padding: 1rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.pg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 1rem;
+  padding: 0.5rem 1rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background-color: var(--paper);
+}
+
+.pg-controls legend {
+  padding: 0 0.4rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pg-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: Consolas, "Courier New", monospace;
+  cursor: pointer;
+}
+
+.pg-stage {
+  position: relative;               /* anchor for the absolute option */
+  height: 15rem;
+  padding: 0.6rem;
+  overflow: auto;
+  background-color: #D5E1E6;
+  border: 2px dashed var(--water);
+  border-radius: 8px;
+}
+
+.pg-box {
+  /* position is switched by script.js */
+  top: 24px;
+  left: 48px;
+  z-index: 5;
+  width: 11rem;
+  margin-bottom: 0.4rem;
+  padding: 0.6rem 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--alert);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(18, 48, 63, 0.3);
+}
+
+.pg-code {
+  margin: 1rem 0 0.5rem;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  color: #E8F0F3;
+  background-color: var(--ink);
+  border-radius: 8px;
+}
+
+.pg-code code {
+  padding: 0;
+  color: inherit;
+  background: none;
+}
+
+.pg-note {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+/* =========================================================
+   15. RESPONSIVE LABEL (live breakpoint indicator)
+   The text comes from CSS, so it changes with each media query below.
+   ========================================================= */
+.bp-live {
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  background-color: var(--mist);
+  border-left: 6px solid var(--water);
+  border-radius: 8px;
+}
+
+.bp-name::after {
+  content: "desktop";
+}
+
+/* =========================================================
+   16. CONTACT + FIXED ELEMENTS + FOOTER
+   ========================================================= */
+address {
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  font-style: normal;
+  line-height: 1.8;
+  background-color: var(--mist);
+  border-left: 5px solid var(--water);
+  border-radius: 8px;
+}
+
+/* position: fixed -> bottom right */
+a.back-to-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 200;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background-color: var(--water);
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(18, 48, 63, 0.3);
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+a.back-to-top:hover {
+  color: #fff;
+  background-color: var(--ink);
+  transform: translateY(-3px);
+}
+
+/* position: fixed -> bottom left, live alert */
+.fixed-alert {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 190;
+  width: 17rem;
+  padding: 0.8rem 2.2rem 0.8rem 1rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink);
+  background-color: #FDF0EE;
+  border: 1px solid #F1C9C3;
+  border-left: 6px solid var(--alert);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(18, 48, 63, 0.25);
+}
+
+.fixed-alert[hidden] {
+  display: none;
+}
+
+.fixed-alert p {
+  margin: 0 0 0.3rem;
+}
+
+.fixed-alert strong {
+  color: var(--alert);
+}
+
+.fixed-alert a {
+  font-weight: 600;
+}
+
+.fixed-alert button {
+  position: absolute;               /* close button inside the fixed box */
+  top: 0.35rem;
+  right: 0.45rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+}
+
+.fixed-alert button:hover {
+  background-color: #F1C9C3;
+}
+
+footer {
+  margin-top: 2rem;
+  padding: 2rem 1.5rem 5rem;        /* extra room so fixed boxes never cover the footer links */
+  text-align: center;
+  color: #C5D9E0;
+  background-color: var(--ink);
+}
+
+footer p {
+  max-width: none;
+  margin: 0.3rem 0;
+}
+
+footer a {
+  padding: 0 0.4rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #8FD3DE;
+  text-decoration: underline;
+}
+
+/* =========================================================
+   17. MEDIA QUERIES
+   Desktop-first: the styles above are the desktop layout.
+     Large desktop : 1400px and wider
+     Tablet        : 601px to 1024px   (max-width: 1024px)
+     Mobile        : 600px and narrower (max-width: 600px)
+   ========================================================= */
+
+/* ---------- Large desktop (min-width: 1400px) ---------- */
+@media (min-width: 1400px) {
+  main,
+  nav ul {
+    max-width: 1240px;
+  }
+
+  main > section {
+    padding: 2.5rem;
+  }
+}
+
+/* ---------- Tablet and below (max-width: 1024px) ---------- */
+@media (max-width: 1024px) {
+  .bp-live {
+    border-left-color: var(--amber);
+  }
+
+  .bp-name::after {
+    content: "tablet";
+  }
+
+  /* Header and spacing tighten */
+  header#top {
+    padding: 3rem 1.25rem 2.5rem;
+  }
+
+  main {
+    padding: 1.5rem 1rem 1rem;
+  }
+
+  main > section {
+    padding: 1.5rem;
+  }
+
+  /* Navigation: one row that scrolls sideways. The first and last items have
+     auto margins, so the row is centred when it fits and scrolls when it does not. */
+  nav ul {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  nav li:first-child { margin-left: auto; }
+  nav li:last-child  { margin-right: auto; }
+
+  /* About section stacks */
+  .about-layout {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  /* Grids drop to two columns */
+  .stat-grid,
+  .gallery,
+  .pos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  figure iframe {
+    height: 320px;
+  }
+}
+
+/* ---------- Mobile (max-width: 600px) ---------- */
+@media (max-width: 600px) {
+  html {
+    font-size: 93.75%;                /* 15px base: every rem value scales down */
+  }
+
+  .bp-live {
+    border-left-color: var(--leaf);
+  }
+
+  .bp-name::after {
+    content: "mobile";
+  }
+
+  /* Header: the chip moves into the flow */
+  header#top {
+    padding: 2.25rem 1rem 2rem;
+  }
+
+  header#top::after {
+    position: static;
+    display: inline-block;
+    margin-top: 1rem;
+  }
+
+  header#top p {
+    font-size: 1rem;
+  }
+
+  /* Navigation: menu button + dropdown */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--nav-height);
+    padding: 0.35rem 1rem;
+  }
+
+  nav ul {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.3rem;
+    padding: 0.25rem 1rem 1rem;
+    overflow: visible;
+  }
+
+  nav li:first-child,
+  nav li:last-child {
+    margin: 0;
+  }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;                 /* comfortable touch target */
+    background-color: var(--mist);
+    border: 1px solid var(--line);
+  }
+
+  /* With JavaScript the list becomes an absolute dropdown under the sticky bar */
+  .js nav ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: none;
+    max-height: calc(100vh - var(--nav-height));
+    overflow-y: auto;
+    background-color: var(--paper);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 10px 18px rgba(18, 48, 63, 0.15);
+  }
+
+  .js nav.open ul {
+    display: flex;
+  }
+
+  /* Spacing and type */
+  main {
+    padding: 1rem 0.75rem 0.75rem;
+  }
+
+  main > section {
+    padding: 1.1rem;
+    border-radius: 10px;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+  }
+
+  h3 {
+    margin-top: 1.4rem;
+    font-size: 1.05rem;
+  }
+
+  /* Everything becomes one column */
+  #indicators ul,
+  .figure-row,
+  dl,
+  .stat-grid,
+  .gallery,
+  .pos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+
+  /* Media */
+  figure iframe {
+    height: 250px;
+  }
+
+  /* Tables keep their scroll box with tighter cells */
+  th,
+  td {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .aqi-pin {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  /* Touch-friendly controls */
+  .pg-controls label {
+    min-height: 44px;
+  }
+
+  .pg-stage {
+    height: 13rem;
+  }
+
+  /* Fixed elements get smaller so they never cover the content */
+  a.back-to-top {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .fixed-alert {
+    left: 0.75rem;
+    right: 8.5rem;                    /* leaves room for the Back to top button */
+    bottom: 0.75rem;
+    width: auto;
+    font-size: 0.82rem;
+  }
+}
+
+/* ---------- Small phones (max-width: 400px) ---------- */
+@media (max-width: 400px) {
+  .status {
+    min-width: 5.5rem;
+  }
+
+  .aqi-pin {
+    font-size: 0.68rem;
+  }
+
+  .gallery-item figcaption {
+    padding: 0.85rem;
+  }
+}
+
+/* ---------- Short landscape screens (phones turned sideways) ---------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  nav {
+    position: static;                 /* a sticky bar would use too much of the short screen */
+  }
+
+  .fixed-alert {
+    display: none;                    /* the same alert is in the Alerts section */
+  }
+}
+
+/* ---------- Touch screens: no hover effects ---------- */
+@media (hover: none) {
+  article:hover,
+  #indicators ul li:hover,
+  a.back-to-top:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  figure img:hover,
+  .gallery-item:hover img {
+    transform: none;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    transition: none !important;
+  }
+
+  .scroll-track {
+    animation: none;
+  }
+}
+
+
+/* =========================================================
+   18. ANIMATIONS (Practicum 9)
+   CSS describes the motion. script.js only adds, removes or
+   toggles the classes that start it.
+   ========================================================= */
+
+/* ---------- 18.1 Keyframes ---------- */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(110%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(110%); }
+}
+
+@keyframes slideUpIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDownOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(40px); }
+}
+
+@keyframes dropDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseRed {
+  0%   { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(192, 57, 43, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0); }
+}
+
+@keyframes ribbonBounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+@keyframes pop {
+  0%   { transform: scale(0.9); }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 18.2 Page load ---------- */
+header#top h1 {
+  animation: fadeUp 0.7s ease-out both;
+}
+
+header#top p {
+  animation: fadeUp 0.7s ease-out 0.15s both;
+}
+
+/* Unhealthy badges pulse to draw the eye */
+.status.unhealthy {
+  animation: pulseRed 2s ease-out infinite;
+}
+
+/* The "New" ribbon bounces until the alert is marked as read */
+.ribbon {
+  animation: ribbonBounce 1.8s ease-in-out infinite;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* ---------- 18.3 Buttons (shared) ---------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.55rem 1.1rem;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background-color: var(--water);
+  border: 2px solid var(--water);
+  border-radius: 999px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+              background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.btn:hover {
+  background-color: var(--water-dark);
+  border-color: var(--water-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(18, 48, 63, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: none;
+}
+
+.btn:disabled {
+  cursor: progress;
+  opacity: 0.8;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-ghost {
+  color: var(--water-dark);
+  background-color: transparent;
+}
+
+.btn-ghost:hover {
+  color: #fff;
+}
+
+.btn-warn   { background-color: var(--amber); border-color: var(--amber); }
+.btn-warn:hover   { background-color: #8F5C14; border-color: #8F5C14; }
+.btn-danger { background-color: var(--alert); border-color: var(--alert); }
+.btn-danger:hover { background-color: #962D22; border-color: #962D22; }
+
+.alert-actions,
+.demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+/* Subscribe button: spinner (loading) and tick (done) */
+.spinner {
+  display: none;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+}
+
+.btn.loading .spinner {
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+.btn.done {
+  background-color: var(--leaf);
+  border-color: var(--leaf);
+  animation: pop 0.4s ease-out;
+}
+
+/* Mark as read: ghost button turns solid when pressed */
+.btn-ghost.active {
+  color: #fff;
+  background-color: var(--leaf);
+  border-color: var(--leaf);
+}
+
+/* ---------- 18.4 Station cards: open and close details ---------- */
+.card-toggle {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.card-toggle:hover {
+  color: #fff;
+  background-color: var(--water);
+  transform: translateY(-1px);
+}
+
+/* 0fr to 1fr lets the panel animate to its natural height */
+.card-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.35s ease, opacity 0.35s ease;
+}
+
+.card-detail-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.card-detail p {
+  margin: 0.6rem 0 0;
+  font-size: 0.88rem;
+}
+
+.stat-card.expanded .card-detail {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.stat-card {
+  transition: box-shadow 0.25s ease;
+}
+
+.stat-card.expanded {
+  box-shadow: var(--shadow);
+}
+
+/* ---------- 18.5 Gallery: information card slides over the photo ---------- */
+.info-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 0;
+  border-radius: 50%;
+  transition: transform 0.3s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.info-btn:hover {
+  transform: scale(1.12);
+}
+
+.gallery-frame.info-open .info-btn {
+  color: #fff;
+  background-color: var(--ink);
+  transform: rotate(180deg);
+}
+
+.gallery-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: 0.9rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #fff;
+  background-color: rgba(18, 48, 63, 0.92);
+  opacity: 0;
+  transform: translateY(100%);
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.gallery-info ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.gallery-frame.info-open .gallery-info {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ---------- 18.6 Alerts: collapsible content and read state ---------- */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.4s ease, opacity 0.4s ease;
+}
+
+.collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.collapse ul {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem 0.75rem 2rem;
+  background-color: var(--paper);
+  border: 1px solid #F1C9C3;
+  border-radius: 8px;
+}
+
+.collapse.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+article.alert {
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.4s ease, border-color 0.4s ease;
+}
+
+article.alert.is-read {
+  background-color: var(--mist);
+  border-left-color: var(--leaf);
+}
+
+article.alert.is-read h3 {
+  color: var(--leaf);
+}
+
+article.alert.is-read .ribbon {
+  opacity: 0;
+  transform: translateY(-100%);
+  animation: none;
+}
+
+/* ---------- 18.7 Notifications (toasts) ---------- */
+.toast-stack {
+  position: fixed;
+  top: calc(var(--nav-height) + 1rem);
+  right: 1.25rem;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(20rem, calc(100vw - 2.5rem));
+  pointer-events: none;
+}
+
+.toast {
+  position: relative;
+  padding: 0.8rem 2.2rem 0.8rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--ink);
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--leaf);
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(18, 48, 63, 0.25);
+  pointer-events: auto;
+  animation: slideInRight 0.4s ease-out both;
+}
+
+.toast.warning { border-left-color: var(--amber); }
+.toast.error   { border-left-color: var(--alert); }
+
+.toast strong {
+  display: block;
+}
+
+.toast.hide {
+  animation: slideOutRight 0.35s ease-in forwards;
+}
+
+.toast-close {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.toast-close:hover {
+  background-color: var(--mist);
+}
+
+/* ---------- 18.8 Live alert: slide in, slide out ---------- */
+.fixed-alert {
+  animation: slideUpIn 0.6s ease-out 1s both;
+}
+
+.fixed-alert.closing {
+  animation: slideDownOut 0.35s ease-in forwards;
+}
+
+.fixed-alert button {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.fixed-alert button:hover {
+  transform: rotate(90deg);
+}
+
+/* ---------- 18.9 Positioning playground: pop when the value changes ---------- */
+.pg-box.pop {
+  animation: pop 0.4s ease-out;
+}
+
+.pg-note {
+  transition: opacity 0.3s ease;
+}
+
+.pg-note.fading {
+  opacity: 0;
+}
+
+/* ---------- 18.10 Mobile menu drop-down ---------- */
+@media (max-width: 600px) {
+  .js nav.open ul {
+    animation: dropDown 0.25s ease-out;
+  }
+
+  .toast-stack {
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+  }
+}
+
+/* ---------- 18.11 Touch screens: no hover lift ---------- */
+@media (hover: none) {
+  .btn:hover,
+  .card-toggle:hover,
+  .info-btn:hover,
+  .fixed-alert button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* ---------- 18.12 Reduced motion: keep the final state, drop the movement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  header#top h1,
+  header#top p,
+  .status.unhealthy,
+  .ribbon,
+  .toast,
+  .toast.hide,
+  .fixed-alert,
+  .fixed-alert.closing,
+  .btn.done,
+  .btn.loading .spinner,
+  .pg-box.pop,
+  .station-item.is-new,
+  .station-item.is-updated,
+  .station-item.leaving,
+  tr.row-flash,
+  .form-success,
+  .field-error,
+  .form-alert,
+  .js nav.open ul {
+    animation: none !important;
+  }
+
+  .toast.hide,
+  .fixed-alert.closing {
+    opacity: 0;
+  }
+}
+
+
+/* =========================================================
+   19. STATION MANAGER (Practicum 10)
+   Layout uses grid and flex. Cards are built by script.js.
+   ========================================================= */
+
+/* The hidden attribute must win over display rules such as .btn */
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- 19.1 Summary counters ---------- */
+.mgr-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.mgr-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.mgr-stat-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.mgr-stat-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--water-dark);
+}
+
+/* ---------- 19.2 Form ---------- */
+.mgr-form {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  gap: 0.9rem;
+  align-items: end;
+  padding: 1rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--water);
+  border-radius: var(--radius);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.mgr-form[data-mode="edit"] {
+  background-color: #FFF8E8;
+  border-left-color: var(--amber);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.field input,
+.mgr-search {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: var(--ink);
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.field input:focus,
+.mgr-search:focus {
+  border-color: var(--water);
+}
+
+.field input.invalid {
+  background-color: #FDF0EE;
+  border-color: var(--alert);
+}
+
+.mgr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  grid-column: 1 / -1;
+}
+
+.mgr-error {
+  min-height: 1.5rem;
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+  color: var(--alert);
+}
+
+/* ---------- 19.3 Toolbar: search and filter chips ---------- */
+.mgr-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.mgr-search {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+.mgr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 0.3rem 0.9rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.chip:hover {
+  border-color: var(--water);
+}
+
+.chip.active {
+  color: #fff;
+  background-color: var(--water);
+  border-color: var(--water);
+}
+
+/* ---------- 19.4 Station cards ---------- */
+.station-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.station-item {
+  position: relative;               /* anchor for the coloured stripe */
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.9rem 1rem 0.9rem 1.4rem;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.station-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 8px;
+  background-color: var(--leaf);
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.station-item.moderate::before  { background-color: var(--amber); }
+.station-item.unhealthy::before { background-color: var(--alert); }
+
+.station-item.editing {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px rgba(183, 121, 31, 0.35);
+}
+
+.si-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.75rem;
+}
+
+.si-name {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.station-item .status {
+  min-width: 0;
+  padding: 0.1rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.si-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.si-metric {
+  padding: 0.15rem 0.6rem;
+  font-size: 0.82rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.si-metric b {
+  color: var(--ink);
+}
+
+.si-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.mini-btn {
+  min-height: 36px;
+  padding: 0.25rem 0.9rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--water-dark);
+  cursor: pointer;
+  background-color: var(--paper);
+  border: 1px solid var(--water);
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.mini-btn:hover {
+  color: #fff;
+  background-color: var(--water);
+  transform: translateY(-1px);
+}
+
+.mini-btn.danger {
+  color: var(--alert);
+  border-color: var(--alert);
+}
+
+.mini-btn.danger:hover {
+  color: #fff;
+  background-color: var(--alert);
+}
+
+.mgr-empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-style: italic;
+  background-color: var(--mist);
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  max-width: none;
+}
+
+.mgr-footer {
+  margin-top: 1rem;
+}
+
+#mgrReset.confirm {
+  color: #fff;
+  background-color: var(--alert);
+  border-color: var(--alert);
+}
+
+/* ---------- 19.5 Activity log ---------- */
+.activity-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.activity-log li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
+  background-color: var(--mist);
+  border-left: 4px solid var(--water);
+  border-radius: 6px;
+  animation: fadeUp 0.35s ease-out;
+}
+
+.activity-log .activity-empty {
+  font-style: italic;
+  border-left-color: var(--line);
+  animation: none;
+}
+
+.activity-time {
+  font-weight: 700;
+  color: var(--water-dark);
+}
+
+/* ---------- 19.6 Animations for DOM changes ---------- */
+@keyframes flashGreen {
+  0%   { background-color: #CFEBD9; }
+  100% { background-color: var(--paper); }
+}
+
+@keyframes shrinkOut {
+  to { opacity: 0; transform: scale(0.92); }
+}
+
+@keyframes rowFlash {
+  0%   { background-color: #CFEBD9; }
+  100% { background-color: transparent; }
+}
+
+.station-item.is-new      { animation: fadeUp 0.5s ease-out; }
+.station-item.is-updated  { animation: flashGreen 1.2s ease-out; }
+.station-item.leaving     { animation: shrinkOut 0.3s ease-in forwards; }
+tr.row-flash td,
+tr.row-flash th           { animation: rowFlash 1.4s ease-out; }
+
+/* ---------- 19.7 Responsive ---------- */
+@media (max-width: 1024px) {
+  .mgr-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .field-name {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .mgr-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .mgr-form,
+  .station-list {
+    grid-template-columns: 1fr;
+  }
+
+  .mgr-search {
+    max-width: none;
+  }
+}
+
+@media (hover: none) {
+  .mini-btn:hover {
+    transform: none;
+  }
+}
+
+
+/* =========================================================
+   20. INCIDENT REPORT FORM (Practicum 11)
+   Fields only turn red or green after the visitor has touched
+   them (the .touched class is added by script.js), so an empty
+   form never opens covered in error colours.
+   ========================================================= */
+
+/* ---------- 20.1 Layout: fieldsets, rows, labels ---------- */
+.report-form fieldset {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin: 0 0 1.25rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--water);
+  border-radius: var(--radius);
+}
+
+.report-form legend {
+  padding: 0 0.5rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.form-row.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.req {
+  font-weight: 700;
+  color: var(--alert);
+}
+
+.req-note {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #5B7482;
+}
+
+/* ---------- 20.2 Inputs, selects and the textarea ---------- */
+.report-form .field input,
+.report-form select,
+.report-form textarea {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  color: var(--ink);
+  background-color: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-form textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.report-form select {
+  cursor: pointer;
+}
+
+.report-form ::placeholder {
+  color: #7F95A1;
+}
+
+/* :focus */
+.report-form .field input:focus,
+.report-form select:focus,
+.report-form textarea:focus {
+  border-color: var(--water);
+  box-shadow: 0 0 0 3px rgba(27, 127, 142, 0.25);
+  outline: none;
+}
+
+/* :invalid and :valid (only after the field has been touched) */
+.report-form .touched:invalid,
+.report-form .field input.touched:invalid {
+  background-color: #FDF0EE;
+  border-color: var(--alert);
+}
+
+.report-form .touched:invalid:focus {
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.25);
+}
+
+.report-form .touched:valid,
+.report-form .field input.touched:valid {
+  border-color: var(--leaf);
+}
+
+/* ---------- 20.3 Error messages and counter ---------- */
+.field-error {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--alert);
+  animation: fadeUp 0.25s ease-out;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+.field-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.char-count {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #5B7482;
+}
+
+.char-count.near { color: var(--amber); font-weight: 700; }
+.char-count.max  { color: var(--alert); font-weight: 700; }
+
+/* ---------- 20.4 Checkboxes ---------- */
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.check input {
+  flex: 0 0 auto;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--water);
+  cursor: pointer;
+}
+
+.check label {
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.check input.touched:invalid {
+  outline: 2px solid var(--alert);
+  outline-offset: 2px;
+}
+
+/* ---------- 20.5 Buttons and form-level message ---------- */
+.form-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.form-alert {
+  max-width: none;
+  margin: 0 0 1rem;
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+  color: var(--alert);
+  background-color: #FDF0EE;
+  border: 1px solid #F1C9C3;
+  border-left: 6px solid var(--alert);
+  border-radius: 8px;
+  animation: fadeUp 0.3s ease-out;
+}
+
+/* ---------- 20.6 Success panel ---------- */
+.form-success {
+  padding: 1.5rem;
+  background-color: #EAF6EE;
+  border: 1px solid #BFE0CB;
+  border-left: 6px solid var(--leaf);
+  border-radius: var(--radius);
+  animation: fadeUp 0.5s ease-out;
+}
+
+.form-success h3 {
+  margin-top: 0.5rem;
+  color: var(--leaf);
+}
+
+.success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--leaf);
+  border-radius: 50%;
+  animation: pop 0.5s ease-out;
+}
+
+.summary-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.summary-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.75rem;
+  padding: 0.45rem 0.8rem;
+  background-color: var(--paper);
+  border: 1px solid #BFE0CB;
+  border-radius: 6px;
+}
+
+.summary-key {
+  flex: 0 0 8rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.summary-value {
+  flex: 1 1 12rem;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 20.7 Responsive ---------- */
+@media (max-width: 1024px) {
+  .form-row.three {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .form-row,
+  .form-row.three {
+    grid-template-columns: 1fr;
+  }
+
+  .report-form fieldset {
+    padding: 1rem;
+  }
+
+  .form-buttons .btn {
+    flex: 1 1 100%;
+  }
+
+  .summary-key {
+    flex-basis: 100%;
+  }
+}
+
+
+/* =========================================================
+   21. LIVE API DATA (Practicum 12)
+   Loading indicator, error box and the tables and cards that
+   script.js fills after fetch() returns.
+   ========================================================= */
+.api-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.api-status {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.api-panel {
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- Loading indicator ---------- */
+.loader {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  background-color: var(--mist);
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.loader p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.spinner-lg {
+  flex: 0 0 auto;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 3px solid var(--line);
+  border-top-color: var(--water);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ---------- Error box ---------- */
+.api-error {
+  padding: 1rem 1.25rem;
+  background-color: #FDF0EE;
+  border: 1px solid #F1C9C3;
+  border-left: 6px solid var(--alert);
+  border-radius: var(--radius);
+  animation: fadeUp 0.3s ease-out;
+}
+
+.api-error p {
+  max-width: none;
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: var(--alert);
+}
+
+/* ---------- Alerts under the cards ---------- */
+.api-alerts {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.api-alerts p {
+  max-width: none;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.92rem;
+  background-color: #FDF0EE;
+  border-left: 5px solid var(--alert);
+  border-radius: 8px;
+}
+
+.api-alerts p.clear {
+  background-color: #EAF6EE;
+  border-left-color: var(--leaf);
+}
+
+/* ---------- Table and notes ---------- */
+.api-table {
+  min-width: 46rem;
+}
+
+.api-panel .table-scroll {
+  margin-top: 0.75rem;
+}
+
+.api-meta {
+  max-width: none;
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  color: #5B7482;
+}
+
+@media (max-width: 600px) {
+  .api-toolbar .btn {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner-lg {
+    animation-duration: 2.4s;
+  }
+
+  .api-error {
+    animation: none;
+  }
+}
+
+
+/* =========================================================
+   22. TASK MANAGER (Practicum 13)
+   Layout uses grid and flex. Cards and rows are built by script.js.
+   ========================================================= */
+.task-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+/* ---------- Form ---------- */
+.task-form {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.9rem;
+  padding: 1rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--water);
+  border-radius: var(--radius);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.task-form[data-mode="edit"] {
+  background-color: #FFF8E8;
+  border-left-color: var(--amber);
+}
+
+.tk-wide {
+  grid-column: span 2;
+}
+
+.task-form select,
+.task-form textarea,
+.task-filter {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: var(--ink);
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.task-form textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.task-form select:hover,
+.task-form textarea:hover,
+.task-filter:hover,
+.task-form select:focus,
+.task-form textarea:focus,
+.task-filter:focus {
+  border-color: var(--water);
+}
+
+.task-filter {
+  flex: 0 1 12rem;
+  width: auto;
+  cursor: pointer;
+}
+
+/* ---------- Task cards ---------- */
+.task-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.9rem 1rem;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 6px solid #5B7482;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(18, 48, 63, 0.14);
+}
+
+.task-item.progress { border-left-color: var(--amber); }
+.task-item.done     { border-left-color: var(--leaf); }
+
+.task-item.done .tk-title {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+.task-item.editing {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px rgba(183, 121, 31, 0.35);
+}
+
+.tk-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.75rem;
+}
+
+.tk-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.tk-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tk-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #5B7482;
+}
+
+.tk-notes {
+  margin: 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.tk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.tk-status-select {
+  min-height: 36px;
+  padding: 0.2rem 0.6rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: border-color 0.2s ease;
+}
+
+.tk-status-select:hover {
+  border-color: var(--water);
+}
+
+/* ---------- Status and priority pills (shared with the table) ---------- */
+.task-item .status,
+.task-table .status {
+  min-width: 0;
+  padding: 0.1rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+.status.st-todo     { background-color: #5B7482; }
+.status.st-progress { background-color: var(--amber); }
+.status.st-done     { background-color: var(--leaf); }
+.status.pr-low      { background-color: var(--leaf); }
+.status.pr-medium   { background-color: var(--amber); }
+.status.pr-high     { background-color: var(--alert); }
+.status.overdue     { background-color: var(--ink); }
+
+.task-table td.tk-due-late {
+  font-weight: 700;
+  color: var(--alert);
+}
+
+/* ---------- Animations ---------- */
+.task-item.is-new  { animation: fadeUp 0.5s ease-out; }
+.task-item.leaving { animation: shrinkOut 0.3s ease-in forwards; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .task-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .task-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .task-form,
+  .task-list,
+  .task-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .tk-wide {
+    grid-column: auto;
+  }
+
+  .task-filter {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
+@media (hover: none) {
+  .task-item:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-item.is-new,
+  .task-item.leaving {
+    animation: none !important;
+  }
+}
+
+
+/* =========================================================
+   23. INTERACTIVE TOOLS (Practicum 14)
+   Pollutant Explorer (search + filter + accordion) and the
+   Station Comparison Tool. Built and updated by script.js.
+   ========================================================= */
+
+/* ---------- Pollutant Explorer ---------- */
+.px-count {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--water-dark);
+}
+
+.px-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.px-item {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--amber);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+.px-item.water { border-left-color: var(--water-dark); }
+.px-item.noise { border-left-color: var(--ink); }
+
+.px-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(18, 48, 63, 0.14);
+}
+
+.px-item.is-open {
+  border-color: var(--water);
+  box-shadow: 0 0 0 2px rgba(27, 127, 142, 0.25);
+}
+
+/* details and summary make the accordion */
+.px-item details {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.px-item summary {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 3rem 0.85rem 0.9rem;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.px-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.px-item summary:hover {
+  background-color: var(--mist);
+}
+
+.px-item summary:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: -3px;
+}
+
+.px-item img {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+}
+
+.px-name {
+  display: block;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.px-sub {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #5B7482;
+}
+
+/* the arrow is positioned on the right and turns when the card opens */
+.px-item summary::after {
+  content: "";
+  position: absolute;
+  top: 1.55rem;
+  right: 1.1rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 3px solid var(--water-dark);
+  border-bottom: 3px solid var(--water-dark);
+  transform: translateY(-50%) rotate(45deg);
+  transition: transform 0.3s ease;
+}
+
+.px-item details[open] summary::after {
+  transform: translateY(-20%) rotate(225deg);
+}
+
+.px-body {
+  padding: 0.25rem 1rem 1rem;
+  animation: fadeUp 0.3s ease-out;
+}
+
+.px-body dl {
+  display: block;
+  margin: 0;
+}
+
+.px-body dt {
+  padding: 0;
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--water-dark);
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.px-body dd {
+  padding: 0;
+  margin: 0.1rem 0 0;
+  font-size: 0.92rem;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+/* ---------- Comparison tool ---------- */
+.cmp-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.cmp-controls .field {
+  flex: 1 1 12rem;
+}
+
+.cmp-controls select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.cmp-controls select:hover,
+.cmp-controls select:focus {
+  border-color: var(--water);
+}
+
+.cmp-swap:hover {
+  transform: rotate(8deg);
+}
+
+.cmp-table {
+  min-width: 28rem;
+}
+
+.cmp-table td {
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.cmp-table td.cmp-win {
+  font-weight: 700;
+  color: var(--leaf);
+  background-color: #EAF6EE;
+}
+
+.cmp-table td.cmp-win::after {
+  content: " (better)";
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cmp-verdict {
+  margin-top: 0.9rem;
+  padding: 0.8rem 1rem;
+  max-width: none;
+  font-weight: 600;
+  color: var(--ink);
+  background-color: var(--mist);
+  border-left: 6px solid var(--water);
+  border-radius: 8px;
+}
+
+@media (max-width: 1024px) {
+  .px-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (hover: none) {
+  .px-item:hover,
+  .cmp-swap:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .px-body {
+    animation: none;
+  }
+}
+
+
+/* =========================================================
+   24. PORTAL SETTINGS: CUSTOM TOGGLE SWITCH (Practicum 15)
+   A normal checkbox is restyled with appearance: none. The track
+   is the input itself and the round knob is its ::before. The
+   :checked state moves the knob and changes the colour.
+   ========================================================= */
+.settings-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  background-color: var(--mist);
+  border: 1px solid var(--line);
+  border-left: 6px solid #9FB3BD;
+  border-radius: var(--radius);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.setting:hover {
+  background-color: #DDEBF0;
+}
+
+.setting.is-on {
+  border-left-color: var(--leaf);
+}
+
+.setting-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.setting-title {
+  display: block;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.setting-desc {
+  max-width: none;
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+  color: #5B7482;
+}
+
+.setting-state {
+  min-width: 2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: right;
+  color: #5B7482;
+  transition: color 0.3s ease;
+}
+
+.setting.is-on .setting-state {
+  color: var(--leaf);
+}
+
+/* ---------- The switch ---------- */
+.toggle {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  flex: 0 0 auto;
+  width: 3.4rem;
+  height: 1.9rem;
+  margin: 0;
+  cursor: pointer;
+  background-color: #9FB3BD;
+  border: 0;
+  border-radius: 999px;
+  transition: background-color 0.3s ease, box-shadow 0.2s ease;
+}
+
+/* the round knob */
+.toggle::before {
+  content: "";
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(18, 48, 63, 0.35);
+  transition: transform 0.3s ease;
+}
+
+.toggle:hover {
+  box-shadow: 0 0 0 4px rgba(27, 127, 142, 0.18);
+}
+
+.toggle:checked {
+  background-color: var(--leaf);
+}
+
+.toggle:checked::before {
+  transform: translateX(1.5rem);
+}
+
+.toggle:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: 3px;
+}
+
+.settings-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 1.25rem;
+}
+
+.settings-summary {
+  max-width: none;
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ---------- What the switches change on the page ---------- */
+/* Unhealthy stations only: hides every table row without an Unhealthy badge */
+body.alerts-only #data tbody tr:not(:has(.status.unhealthy)) {
+  display: none;
+}
+
+.alerts-note {
+  max-width: none;
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+  background-color: #FDF0EE;
+  border-left: 5px solid var(--alert);
+  border-radius: 8px;
+}
+
+/* Large text: placed last so it also beats the mobile font size */
+html.large-text {
+  font-size: 112.5%;
+}
+
+@media (max-width: 600px) {
+  .setting {
+    flex-wrap: wrap;
+  }
+
+  .setting-text {
+    flex-basis: 100%;
+  }
+
+  .setting-state {
+    margin-right: auto;
+    text-align: left;
+  }
+}

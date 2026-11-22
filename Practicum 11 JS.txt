@@ -1,0 +1,1284 @@
+/* =========================================================
+   1. MOBILE MENU
+   Opens and closes the dropdown. The CSS only shows the
+   button and dropdown on screens 600px wide or narrower.
+   ========================================================= */
+(function () {
+  var nav = document.getElementById("siteNav");
+  var button = document.getElementById("navToggle");
+  var list = document.getElementById("navList");
+
+  if (!nav || !button || !list) return;
+
+  function setOpen(open) {
+    nav.classList.toggle("open", open);
+    button.setAttribute("aria-expanded", String(open));
+  }
+
+  // Button toggles the menu
+  button.addEventListener("click", function () {
+    setOpen(!nav.classList.contains("open"));
+  });
+
+  // Choosing a link closes the menu
+  list.addEventListener("click", function (event) {
+    if (event.target.closest("a")) setOpen(false);
+  });
+
+  // Clicking outside the menu closes it
+  document.addEventListener("click", function (event) {
+    if (nav.classList.contains("open") && !nav.contains(event.target)) setOpen(false);
+  });
+
+  // Escape closes it and returns focus to the button
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && nav.classList.contains("open")) {
+      setOpen(false);
+      button.focus();
+    }
+  });
+
+  // Growing past the mobile breakpoint resets the menu
+  var wide = window.matchMedia("(min-width: 601px)");
+  wide.addEventListener("change", function (event) {
+    if (event.matches) setOpen(false);
+  });
+})();
+
+/* =========================================================
+   2. LIVE WINDOW WIDTH
+   Shows the current width next to the breakpoint name.
+   ========================================================= */
+(function () {
+  var output = document.getElementById("bpWidth");
+  if (!output) return;
+
+  function show() {
+    output.textContent = "(" + window.innerWidth + " px wide)";
+  }
+
+  show();
+  window.addEventListener("resize", show);
+})();
+
+/* =========================================================
+   3. POSITIONING PLAYGROUND
+   Switches the position value of the demo box and explains it.
+   Animated: the box pops and the note fades when the value changes.
+   ========================================================= */
+(function () {
+  var box = document.getElementById("pgBox");
+  var code = document.getElementById("pgCode");
+  var note = document.getElementById("pgNote");
+  var radios = document.querySelectorAll('input[name="pos"]');
+
+  if (!box || !code || !note || !radios.length) return;
+
+  var info = {
+    static: {
+      css: "position: static;\ntop: 24px; left: 48px;  /* ignored */",
+      text: "Static: the box stays in the normal flow and the offsets do nothing."
+    },
+    relative: {
+      css: "position: relative;\ntop: 24px; left: 48px;",
+      text: "Relative: the box moves 24px down and 48px right of its normal spot, but the gap it left behind is kept."
+    },
+    absolute: {
+      css: "position: absolute;\ntop: 24px; left: 48px;",
+      text: "Absolute: the box leaves the flow (the readings below move up) and is placed against the grey area, which is its positioned parent."
+    },
+    fixed: {
+      css: "position: fixed;\ntop: 90px; right: 20px;",
+      text: "Fixed: the box jumps out to the browser window and stays there while you scroll the page. Switch back to another value to bring it home."
+    },
+    sticky: {
+      css: "position: sticky;\ntop: 0;",
+      text: "Sticky: scroll inside the grey area. The box scrolls normally until it reaches the top edge, then it sticks."
+    }
+  };
+
+  function apply(value) {
+    // reset everything the previous choice may have set
+    box.style.position = value;
+    box.style.top = "24px";
+    box.style.left = "48px";
+    box.style.right = "auto";
+
+    if (value === "fixed") {
+      box.style.top = "90px";
+      box.style.left = "auto";
+      box.style.right = "20px";
+    } else if (value === "sticky") {
+      box.style.top = "0";
+      box.style.left = "auto";
+    }
+
+    code.querySelector("code").textContent = info[value].css;
+
+    // Animate: the note fades out and back in, the box pops
+    note.classList.add("fading");
+    setTimeout(function () {
+      note.textContent = info[value].text;
+      note.classList.remove("fading");
+    }, 150);
+
+    box.classList.remove("pop");
+    void box.offsetWidth;            // restart the animation
+    box.classList.add("pop");
+  }
+
+  radios.forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      if (radio.checked) apply(radio.value);
+    });
+  });
+
+  apply("static");
+  box.classList.remove("pop");       // no pop on first load
+})();
+
+/* =========================================================
+   4. DISMISS THE FIXED LIVE ALERT
+   Slides away first, then is hidden.
+   ========================================================= */
+(function () {
+  var alertBox = document.getElementById("fixedAlert");
+  var closeBtn = document.getElementById("fixedAlertClose");
+
+  if (!alertBox || !closeBtn) return;
+
+  closeBtn.addEventListener("click", function () {
+    alertBox.classList.add("closing");        // starts the slide-out animation
+    setTimeout(function () {
+      alertBox.hidden = true;                 // hidden once the animation has finished
+      alertBox.classList.remove("closing");
+    }, 350);
+  });
+})();
+
+/* =========================================================
+   5. NOTIFICATIONS (TOASTS)
+   showToast() builds a card, it slides in (CSS animation),
+   waits, then slides out and is removed.
+   ========================================================= */
+(function () {
+  var stack = document.getElementById("toastStack");
+  if (!stack) return;
+
+  var DISPLAY_TIME = 3500;   // how long a toast stays on screen
+  var EXIT_TIME = 350;       // matches the slideOutRight animation
+
+  function removeToast(toast) {
+    if (!toast.parentNode) return;
+    toast.classList.add("hide");
+    setTimeout(function () {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, EXIT_TIME);
+  }
+
+  window.showToast = function (title, message, type) {
+    var toast = document.createElement("div");
+    toast.className = "toast " + (type || "success");
+
+    var strong = document.createElement("strong");
+    strong.textContent = title;
+    var text = document.createElement("span");
+    text.textContent = message;
+
+    var close = document.createElement("button");
+    close.type = "button";
+    close.className = "toast-close";
+    close.setAttribute("aria-label", "Dismiss notification");
+    close.innerHTML = "&times;";
+
+    toast.appendChild(strong);
+    toast.appendChild(text);
+    toast.appendChild(close);
+    stack.appendChild(toast);
+
+    var timer = setTimeout(function () { removeToast(toast); }, DISPLAY_TIME);
+
+    close.addEventListener("click", function () {
+      clearTimeout(timer);
+      removeToast(toast);
+    });
+
+    // Keep at most 3 toasts on screen
+    while (stack.children.length > 3) stack.removeChild(stack.firstChild);
+  };
+
+  // Demo buttons in the Animations section
+  var messages = {
+    success: ["Saved", "Your settings were saved.", "success"],
+    warning: ["Warning", "Industrial Zone AQI is above 150.", "warning"],
+    error:   ["Error", "Could not reach the Harbour Docks station.", "error"]
+  };
+
+  document.querySelectorAll("[data-toast]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var m = messages[btn.dataset.toast];
+      if (m) window.showToast(m[0], m[1], m[2]);
+    });
+  });
+})();
+
+/* =========================================================
+   6. STATION CARDS: OPEN AND CLOSE DETAILS
+   The button toggles .expanded, CSS animates the height.
+   ========================================================= */
+(function () {
+  var buttons = document.querySelectorAll(".card-toggle");
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var card = btn.closest(".stat-card");
+      var open = card.classList.toggle("expanded");
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Hide details" : "Show details";
+    });
+  });
+})();
+
+/* =========================================================
+   7. GALLERY: INFORMATION CARD OVER THE PHOTO
+   ========================================================= */
+(function () {
+  var gallery = document.querySelector(".gallery");
+  if (!gallery) return;
+
+  function setOpen(frame, open) {
+    frame.classList.toggle("info-open", open);
+    var btn = frame.querySelector(".info-btn");
+    if (btn) btn.setAttribute("aria-expanded", String(open));
+  }
+
+  gallery.addEventListener("click", function (event) {
+    var btn = event.target.closest(".info-btn");
+    if (!btn) return;
+    var frame = btn.closest(".gallery-frame");
+    setOpen(frame, !frame.classList.contains("info-open"));
+  });
+
+  // Escape closes any open information card
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    gallery.querySelectorAll(".info-open").forEach(function (frame) {
+      setOpen(frame, false);
+    });
+  });
+})();
+
+/* =========================================================
+   8. ALERT CARD: SUBSCRIBE, SAFETY ADVICE, MARK AS READ
+   ========================================================= */
+(function () {
+  var subscribe = document.getElementById("subscribeBtn");
+  var adviceBtn = document.getElementById("adviceToggle");
+  var advice = document.getElementById("advicePanel");
+  var readBtn = document.getElementById("markRead");
+  var alertCard = document.querySelector("article.alert");
+
+  // Subscribe: loading spinner, then success state and a notification
+  if (subscribe) {
+    var label = subscribe.querySelector(".btn-label");
+    var busy = false;
+
+    subscribe.addEventListener("click", function () {
+      if (busy) return;
+
+      // Already subscribed: the next click unsubscribes
+      if (subscribe.classList.contains("done")) {
+        subscribe.classList.remove("done");
+        subscribe.setAttribute("aria-pressed", "false");
+        label.textContent = "Subscribe to alerts";
+        if (window.showToast) window.showToast("Unsubscribed", "You will no longer get alert updates.", "warning");
+        return;
+      }
+
+      busy = true;
+      subscribe.classList.add("loading");
+      subscribe.disabled = true;
+      label.textContent = "Subscribing...";
+
+      setTimeout(function () {
+        subscribe.classList.remove("loading");
+        subscribe.classList.add("done");
+        subscribe.disabled = false;
+        subscribe.setAttribute("aria-pressed", "true");
+        label.textContent = "Subscribed";
+        busy = false;
+        if (window.showToast) window.showToast("Subscribed", "You will get Industrial Zone alerts.", "success");
+      }, 1500);
+    });
+  }
+
+  // Safety advice: open and close a content section
+  if (adviceBtn && advice) {
+    adviceBtn.addEventListener("click", function () {
+      var open = advice.classList.toggle("open");
+      adviceBtn.setAttribute("aria-expanded", String(open));
+      adviceBtn.textContent = open ? "Hide safety advice" : "Show safety advice";
+    });
+  }
+
+  // Mark as read: the card changes colour and the ribbon slides away
+  if (readBtn && alertCard) {
+    readBtn.addEventListener("click", function () {
+      var read = alertCard.classList.toggle("is-read");
+      readBtn.classList.toggle("active", read);
+      readBtn.setAttribute("aria-pressed", String(read));
+      readBtn.textContent = read ? "Marked as read" : "Mark as read";
+      if (read && window.showToast) {
+        window.showToast("Marked as read", "This alert is now in your read list.", "success");
+      }
+    });
+  }
+})();
+
+/* =========================================================
+   9. STATION MANAGER (DOM manipulation)
+   Keeps one array of stations and rebuilds the station list,
+   the readings table, the summary cards and the live alert
+   from it, so nothing needs a page reload.
+   ========================================================= */
+(function () {
+  var listEl = document.getElementById("stationList");
+  var tbody = document.querySelector("#data tbody");
+  var form = document.getElementById("mgrForm");
+  if (!listEl || !tbody || !form) return;
+
+  var inputs = {
+    name:  document.getElementById("fName"),
+    aqi:   document.getElementById("fAqi"),
+    pm:    document.getElementById("fPm"),
+    ph:    document.getElementById("fPh"),
+    noise: document.getElementById("fNoise")
+  };
+  var submitBtn = document.getElementById("mgrSubmit");
+  var cancelBtn = document.getElementById("mgrCancel");
+  var errorEl = document.getElementById("mgrError");
+  var titleEl = document.getElementById("mgrFormTitle");
+  var searchEl = document.getElementById("stationSearch");
+  var filtersEl = document.getElementById("mgrFilters");
+  var emptyEl = document.getElementById("mgrEmpty");
+  var resetBtn = document.getElementById("mgrReset");
+  var logEl = document.getElementById("activityLog");
+  var clearLogBtn = document.getElementById("clearLog");
+  var timeEl = document.querySelector("#data tfoot time");
+
+  // Lets the report form (section 10) read the current station names
+  window.getStationNames = function () {
+    return stations.map(function (st) { return st.name; });
+  };
+
+  var STORAGE_KEY = "emp-stations-v1";
+  var DEFAULTS = [
+    { id: 1, name: "Riverside",        aqi: 45,  pm: 11, ph: 7.2, noise: 48 },
+    { id: 2, name: "Industrial Zone",  aqi: 162, pm: 74, ph: 6.4, noise: 82 },
+    { id: 3, name: "City Centre",      aqi: 98,  pm: 36, ph: 7.0, noise: 68 },
+    { id: 4, name: "Lakeside",         aqi: 38,  pm: 8,  ph: 7.4, noise: 42 },
+    { id: 5, name: "Highway Junction", aqi: 88,  pm: 31, ph: 6.9, noise: 79 },
+    { id: 6, name: "Harbour Docks",    aqi: 171, pm: 85, ph: 6.5, noise: 86 },
+    { id: 7, name: "Hillside Park",    aqi: 32,  pm: 7,  ph: 7.3, noise: 40 }
+  ];
+  var RULES = [
+    { key: "aqi",   label: "AQI",      min: 0, max: 500, decimals: 0 },
+    { key: "pm",    label: "PM2.5",    min: 0, max: 500, decimals: 0 },
+    { key: "ph",    label: "Water pH", min: 0, max: 14,  decimals: 1 },
+    { key: "noise", label: "Noise",    min: 0, max: 150, decimals: 0 }
+  ];
+
+  var stations = load();
+  var nextId = 1;
+  var editingId = null;
+  var filter = "all";
+  var query = "";
+
+  stations.forEach(function (s) { if (s.id >= nextId) nextId = s.id + 1; });
+
+  /* ---------- helpers ---------- */
+  function clone(list) {
+    return list.map(function (s) {
+      return { id: s.id, name: s.name, aqi: s.aqi, pm: s.pm, ph: s.ph, noise: s.noise };
+    });
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
+  function setText(id, text) {
+    var node = document.getElementById(id);
+    if (node) node.textContent = text;
+  }
+
+  function toast(title, message, type) {
+    if (window.showToast) window.showToast(title, message, type);
+  }
+
+  function plural(n, word) {
+    return n + " " + word + (n === 1 ? "" : "s");
+  }
+
+  function joinNames(names) {
+    if (names.length <= 1) return names.join("");
+    return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  }
+
+  // Same bands as the AQI scale: up to 50 Good, up to 150 Moderate, above that Unhealthy
+  function statusOf(aqi) {
+    if (aqi <= 50)  return { key: "good",      label: "Good" };
+    if (aqi <= 150) return { key: "moderate",  label: "Moderate" };
+    return { key: "unhealthy", label: "Unhealthy" };
+  }
+
+  function findIndex(id) {
+    for (var i = 0; i < stations.length; i++) {
+      if (stations[i].id === id) return i;
+    }
+    return -1;
+  }
+
+  /* ---------- storage (optional: survives a reload) ---------- */
+  function load() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (Array.isArray(saved) && saved.every(function (s) {
+        return s && typeof s.name === "string" && typeof s.id === "number" &&
+               isFinite(s.aqi) && isFinite(s.pm) && isFinite(s.ph) && isFinite(s.noise);
+      })) {
+        return saved;
+      }
+    } catch (e) { /* storage blocked: fall back to the defaults */ }
+    return clone(DEFAULTS);
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stations)); } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- rendering: station cards (createElement + appendChild) ---------- */
+  function buildCard(st) {
+    var s = statusOf(st.aqi);
+
+    var li = document.createElement("li");
+    li.className = "station-item " + s.key;
+    li.setAttribute("data-id", String(st.id));
+    if (st.id === editingId) li.classList.add("editing");
+
+    var head = document.createElement("div");
+    head.className = "si-head";
+
+    var name = document.createElement("span");
+    name.className = "si-name";
+    name.textContent = st.name;               // textContent: user text is never run as HTML
+
+    var badge = document.createElement("span");
+    badge.className = "status " + s.key;
+    badge.textContent = s.label;
+
+    head.appendChild(name);
+    head.appendChild(badge);
+
+    var metrics = document.createElement("div");
+    metrics.className = "si-metrics";
+    [
+      ["AQI", st.aqi],
+      ["PM2.5", st.pm],
+      ["pH", Number(st.ph).toFixed(1)],
+      ["Noise", st.noise + " dB"]
+    ].forEach(function (m) {
+      var chip = document.createElement("span");
+      chip.className = "si-metric";
+      chip.innerHTML = escapeHTML(m[0]) + " <b>" + escapeHTML(m[1]) + "</b>";
+      metrics.appendChild(chip);
+    });
+
+    var actions = document.createElement("div");
+    actions.className = "si-actions";
+
+    var edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "mini-btn";
+    edit.textContent = "Edit";
+    edit.setAttribute("data-action", "edit");
+    edit.setAttribute("aria-label", "Edit " + st.name);
+
+    var del = document.createElement("button");
+    del.type = "button";
+    del.className = "mini-btn danger";
+    del.textContent = "Remove";
+    del.setAttribute("data-action", "remove");
+    del.setAttribute("aria-label", "Remove " + st.name);
+
+    actions.appendChild(edit);
+    actions.appendChild(del);
+
+    li.appendChild(head);
+    li.appendChild(metrics);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function matchesFilter(st) {
+    var okStatus = filter === "all" || statusOf(st.aqi).key === filter;
+    var okText = !query || st.name.toLowerCase().indexOf(query) !== -1;
+    return okStatus && okText;
+  }
+
+  function updateEmpty() {
+    var has = listEl.children.length > 0;
+    emptyEl.hidden = has;
+    if (!has) {
+      emptyEl.textContent = stations.length === 0
+        ? "No stations yet. Add one using the form above."
+        : "No stations match your search or filter.";
+    }
+  }
+
+  function renderList() {
+    listEl.innerHTML = "";                    // clear, then rebuild from the array
+    stations.filter(matchesFilter).forEach(function (st) {
+      listEl.appendChild(buildCard(st));
+    });
+    updateEmpty();
+  }
+
+  /* ---------- rendering: the existing readings table ---------- */
+  function buildRow(st) {
+    var s = statusOf(st.aqi);
+    var tr = document.createElement("tr");
+    tr.setAttribute("data-id", String(st.id));
+
+    var th = document.createElement("th");
+    th.setAttribute("scope", "row");
+    th.textContent = st.name;
+    tr.appendChild(th);
+
+    [st.aqi, st.pm, Number(st.ph).toFixed(1), st.noise].forEach(function (value) {
+      var td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+
+    var tdStatus = document.createElement("td");
+    var pill = document.createElement("span");
+    pill.className = "status " + s.key;
+    pill.textContent = s.label;
+    tdStatus.appendChild(pill);
+    tr.appendChild(tdStatus);
+    return tr;
+  }
+
+  function renderTable() {
+    tbody.innerHTML = "";
+    stations.forEach(function (st) { tbody.appendChild(buildRow(st)); });
+  }
+
+  /* ---------- rendering: summary cards, counters and live alert ---------- */
+  function setCardTone(valueId, tone) {
+    var card = document.getElementById(valueId).closest(".stat-card");
+    card.classList.remove("ok", "warn", "bad");
+    card.classList.add(tone);
+  }
+
+  function updateSummary() {
+    var n = stations.length;
+    var bad = stations.filter(function (s) { return s.aqi > 150; });
+    var loud = stations.filter(function (s) { return s.noise > 75; });
+
+    setText("mgrCount", String(n));
+    setText("mgrBad", String(bad.length));
+
+    if (n === 0) {
+      setText("mgrAvg", "-");
+      setText("statAqi", "-");
+      setText("statPh", "-");
+      document.getElementById("statNoise").textContent = "-";
+      setText("statAlerts", "0");
+      setText("noteAqi", "No stations");
+      setText("notePh", "No stations");
+      setText("noteNoise", "No stations");
+      setText("noteAlerts", "No active alerts");
+      setText("textAqi", "Add a station to see readings.");
+      setText("textPh", "Add a station to see readings.");
+      setText("textNoise", "Add a station to see readings.");
+      setText("textAlerts", "There are no active alerts.");
+      return;
+    }
+
+    var sumAqi = 0, sumPh = 0, sumNoise = 0;
+    stations.forEach(function (s) { sumAqi += s.aqi; sumPh += s.ph; sumNoise += s.noise; });
+    var avgAqi = Math.round(sumAqi / n);
+    var avgPh = sumPh / n;
+    var avgNoise = Math.round(sumNoise / n);
+
+    var worst = stations.reduce(function (a, b) { return b.aqi > a.aqi ? b : a; });
+    var lowPh = stations.reduce(function (a, b) { return b.ph < a.ph ? b : a; });
+    var aqiStatus = statusOf(avgAqi);
+
+    // Manager counters
+    setText("mgrAvg", String(avgAqi));
+
+    // Summary cards (Network summary)
+    setText("statAqi", String(avgAqi));
+    setText("noteAqi", aqiStatus.label + " across " + plural(n, "station"));
+    setCardTone("statAqi", aqiStatus.key === "good" ? "ok" : aqiStatus.key === "moderate" ? "warn" : "bad");
+
+    setText("statPh", avgPh.toFixed(1));
+    setText("notePh", "Lowest is " + lowPh.name + " at " + Number(lowPh.ph).toFixed(1));
+    setCardTone("statPh", avgPh >= 6.5 && avgPh <= 8.5 ? "ok" : "bad");
+
+    // innerHTML is safe here: the value is a number and the markup is fixed
+    document.getElementById("statNoise").innerHTML = avgNoise + "<small>dB</small>";
+    setText("noteNoise", plural(loud.length, "station") + (loud.length === 1 ? " is" : " are") + " above 75 dB");
+    setCardTone("statNoise", loud.length > 0 ? "warn" : "ok");
+
+    setText("statAlerts", String(bad.length));
+    setText("noteAlerts", bad.length ? joinNames(bad.map(function (s) { return s.name; })) : "No active alerts");
+    setCardTone("statAlerts", bad.length ? "bad" : "ok");
+
+    // Text inside the "Show details" panels
+    setText("textAqi", (n - bad.length) + " of " + n + " stations are Good or Moderate. Highest reading: " +
+            worst.name + " (" + worst.aqi + ").");
+    setText("textPh", "Safe drinking water sits near 6.5 to 8.5. Lowest reading: " +
+            lowPh.name + " (" + Number(lowPh.ph).toFixed(1) + ").");
+    setText("textNoise", loud.length
+      ? "Above 75 dB: " + joinNames(loud.map(function (s) { return s.name + " (" + s.noise + ")"; })) + "."
+      : "No station is above the 75 dB level.");
+    setText("textAlerts", bad.length
+      ? "Unhealthy stations are shown in red in the table. Open the Alerts section for advice."
+      : "No station is above AQI 150 right now.");
+  }
+
+  function updateLiveAlert() {
+    var box = document.getElementById("liveAlertText");
+    if (!box) return;
+    if (!stations.length) {
+      box.innerHTML = "<strong>Live alert</strong><br>No stations are being monitored.";
+      return;
+    }
+    var worst = stations.reduce(function (a, b) { return b.aqi > a.aqi ? b : a; });
+    box.innerHTML = worst.aqi > 150
+      ? "<strong>Live alert</strong><br>" + escapeHTML(worst.name) + " AQI is " + worst.aqi + ". Limit outdoor activity."
+      : "<strong>Live alert</strong><br>All stations are below the alert level (highest AQI " + worst.aqi + ").";
+  }
+
+  function stamp() {
+    if (!timeEl) return;
+    var now = new Date();
+    timeEl.setAttribute("datetime", now.toISOString());
+    timeEl.textContent = now.toLocaleString("en-GB", {
+      day: "numeric", month: "short", year: "numeric",
+      hour: "numeric", minute: "2-digit", hour12: true
+    });
+  }
+
+  function renderAll() {
+    renderTable();
+    renderList();
+    updateSummary();
+    updateLiveAlert();
+    // Tell the report form that the station list may have changed
+    document.dispatchEvent(new CustomEvent("stations:changed"));
+  }
+
+  function flash(id, kind) {
+    var card = listEl.querySelector('[data-id="' + id + '"]');
+    var row = tbody.querySelector('[data-id="' + id + '"]');
+    if (card) card.classList.add(kind === "added" ? "is-new" : "is-updated");
+    if (row) row.classList.add("row-flash");
+    setTimeout(function () {
+      if (card) card.classList.remove("is-new", "is-updated");
+      if (row) row.classList.remove("row-flash");
+    }, 1500);
+  }
+
+  /* ---------- activity log ---------- */
+  function logActivity(message) {
+    var empty = logEl.querySelector(".activity-empty");
+    if (empty) empty.remove();
+
+    var li = document.createElement("li");
+    var time = document.createElement("span");
+    time.className = "activity-time";
+    time.textContent = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    var text = document.createElement("span");
+    text.textContent = message;
+    li.appendChild(time);
+    li.appendChild(text);
+    logEl.insertBefore(li, logEl.firstChild);   // newest first
+
+    while (logEl.children.length > 6) logEl.lastElementChild.remove();
+  }
+
+  clearLogBtn.addEventListener("click", function () {
+    logEl.innerHTML = '<li class="activity-empty">No changes yet. Add, edit or remove a station to see it here.</li>';
+  });
+
+  /* ---------- form: validation ---------- */
+  function clearError() {
+    errorEl.textContent = "";
+    Object.keys(inputs).forEach(function (key) {
+      inputs[key].classList.remove("invalid");
+      inputs[key].removeAttribute("aria-invalid");
+    });
+  }
+
+  function fail(input, message) {
+    errorEl.textContent = message;
+    input.classList.add("invalid");
+    input.setAttribute("aria-invalid", "true");
+    input.focus();
+    return null;
+  }
+
+  function readForm() {
+    var name = inputs.name.value.trim();
+    if (!name) return fail(inputs.name, "Enter a station name.");
+
+    var lower = name.toLowerCase();
+    var duplicate = stations.some(function (s) {
+      return s.name.toLowerCase() === lower && s.id !== editingId;
+    });
+    if (duplicate) return fail(inputs.name, name + " is already on the list.");
+
+    var values = { name: name };
+    for (var i = 0; i < RULES.length; i++) {
+      var rule = RULES[i];
+      var input = inputs[rule.key];
+      var raw = input.value.trim();
+      var num = Number(raw);
+      if (raw === "" || isNaN(num) || num < rule.min || num > rule.max) {
+        return fail(input, rule.label + " must be a number from " + rule.min + " to " + rule.max + ".");
+      }
+      values[rule.key] = rule.decimals ? Math.round(num * 10) / 10 : Math.round(num);
+    }
+    return values;
+  }
+
+  // Clear the error as soon as the visitor starts typing again
+  Object.keys(inputs).forEach(function (key) {
+    inputs[key].addEventListener("input", clearError);
+    inputs[key].addEventListener("keydown", function (event) {
+      if (event.key === "Enter") submit();
+      if (event.key === "Escape" && editingId !== null) stopEditing();
+    });
+  });
+
+  /* ---------- add, modify, remove ---------- */
+  function resetFilters() {
+    filter = "all";
+    query = "";
+    searchEl.value = "";
+    filtersEl.querySelectorAll(".chip").forEach(function (chip) {
+      var on = chip.getAttribute("data-filter") === "all";
+      chip.classList.toggle("active", on);
+      chip.setAttribute("aria-pressed", String(on));
+    });
+  }
+
+  function submit() {
+    clearError();
+    var v = readForm();
+    if (!v) return;
+
+    if (editingId === null) {
+      // ADD
+      var st = { id: nextId++, name: v.name, aqi: v.aqi, pm: v.pm, ph: v.ph, noise: v.noise };
+      stations.push(st);
+      if (!matchesFilter(st)) resetFilters();   // make sure the new card is visible
+      save();
+      stamp();
+      renderAll();
+      flash(st.id, "added");
+      logActivity("Added " + st.name + " (AQI " + st.aqi + ")");
+      toast("Station added", st.name + " is now on the list.", "success");
+      clearForm();
+      inputs.name.focus();
+    } else {
+      // MODIFY
+      var idx = findIndex(editingId);
+      if (idx === -1) { stopEditing(); return; }
+      var target = stations[idx];
+      var oldName = target.name;
+      target.name = v.name;
+      target.aqi = v.aqi;
+      target.pm = v.pm;
+      target.ph = v.ph;
+      target.noise = v.noise;
+      var id = target.id;
+      save();
+      stamp();
+      stopEditing();                            // also re-renders
+      flash(id, "updated");
+      logActivity("Updated " + (oldName === v.name ? v.name : oldName + " (now " + v.name + ")") + " (AQI " + v.aqi + ")");
+      toast("Station updated", v.name + " was saved.", "success");
+    }
+  }
+
+  function clearForm() {
+    Object.keys(inputs).forEach(function (key) { inputs[key].value = ""; });
+  }
+
+  function startEdit(id) {
+    var idx = findIndex(id);
+    if (idx === -1) return;
+    var st = stations[idx];
+
+    clearError();
+    editingId = id;
+    inputs.name.value = st.name;
+    inputs.aqi.value = st.aqi;
+    inputs.pm.value = st.pm;
+    inputs.ph.value = Number(st.ph).toFixed(1);
+    inputs.noise.value = st.noise;
+
+    titleEl.textContent = "Edit station: " + st.name;
+    submitBtn.textContent = "Save changes";
+    cancelBtn.hidden = false;
+    form.setAttribute("data-mode", "edit");
+
+    renderList();                               // marks the card being edited
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    inputs.name.focus({ preventScroll: true });
+  }
+
+  function stopEditing() {
+    editingId = null;
+    clearError();
+    clearForm();
+    titleEl.textContent = "Add a station";
+    submitBtn.textContent = "Add station";
+    cancelBtn.hidden = true;
+    form.setAttribute("data-mode", "add");
+    renderAll();
+  }
+
+  function removeStation(id) {
+    var idx = findIndex(id);
+    if (idx === -1) return;
+    var st = stations[idx];
+
+    stations.splice(idx, 1);
+    if (editingId === id) {
+      editingId = null;
+      clearForm();
+      titleEl.textContent = "Add a station";
+      submitBtn.textContent = "Add station";
+      cancelBtn.hidden = true;
+      form.setAttribute("data-mode", "add");
+    }
+    save();
+    stamp();
+    renderTable();
+    updateSummary();
+    updateLiveAlert();
+    logActivity("Removed " + st.name);
+    toast("Station removed", st.name + " was deleted.", "warning");
+
+    // Let the card shrink away first, then take it out of the DOM
+    var card = listEl.querySelector('[data-id="' + id + '"]');
+    if (card) {
+      card.classList.add("leaving");
+      setTimeout(function () {
+        card.remove();
+        updateEmpty();
+      }, 300);
+    } else {
+      updateEmpty();
+    }
+  }
+
+  /* ---------- events ---------- */
+  submitBtn.addEventListener("click", submit);
+  cancelBtn.addEventListener("click", stopEditing);
+
+  // One listener on the list handles every Edit and Remove button (event delegation)
+  listEl.addEventListener("click", function (event) {
+    var btn = event.target.closest("button[data-action]");
+    if (!btn) return;
+    var card = btn.closest(".station-item");
+    var id = Number(card.getAttribute("data-id"));
+    if (btn.getAttribute("data-action") === "edit") startEdit(id);
+    if (btn.getAttribute("data-action") === "remove") removeStation(id);
+  });
+
+  searchEl.addEventListener("input", function () {
+    query = searchEl.value.trim().toLowerCase();
+    renderList();
+  });
+
+  filtersEl.addEventListener("click", function (event) {
+    var chip = event.target.closest(".chip");
+    if (!chip) return;
+    filter = chip.getAttribute("data-filter");
+    filtersEl.querySelectorAll(".chip").forEach(function (c) {
+      var on = c === chip;
+      c.classList.toggle("active", on);
+      c.setAttribute("aria-pressed", String(on));
+    });
+    renderList();
+  });
+
+  // Reset needs two clicks, so it is never triggered by accident
+  var resetTimer = null;
+  function revertResetButton() {
+    resetBtn.classList.remove("confirm");
+    resetBtn.textContent = "Reset to default stations";
+  }
+
+  resetBtn.addEventListener("click", function () {
+    if (!resetBtn.classList.contains("confirm")) {
+      resetBtn.classList.add("confirm");
+      resetBtn.textContent = "Click again to confirm";
+      resetTimer = setTimeout(revertResetButton, 3000);
+      return;
+    }
+    clearTimeout(resetTimer);
+    revertResetButton();
+
+    stations = clone(DEFAULTS);
+    nextId = DEFAULTS.length + 1;
+    resetFilters();
+    save();
+    stamp();
+    stopEditing();                              // also re-renders
+    logActivity("Reset to the 7 default stations");
+    toast("Stations reset", "The default stations are back.", "warning");
+  });
+
+  // First draw from the data
+  renderAll();
+})();
+
+/* =========================================================
+   10. INCIDENT REPORT FORM (validation)
+   The form has the novalidate attribute, so the browser shows
+   no pop-ups of its own. Each field is checked with
+   checkValidity(), the message is written with
+   setCustomValidity(), shown under the field, and the first
+   problem is announced with reportValidity().
+   ========================================================= */
+(function () {
+  var form = document.getElementById("reportForm");
+  if (!form) return;
+
+  var success = document.getElementById("reportSuccess");
+  var formAlert = document.getElementById("formAlert");
+  var again = document.getElementById("reportAnother");
+
+  var fields = Array.prototype.slice.call(form.querySelectorAll("input, select, textarea"));
+  var f = {
+    name:     document.getElementById("rpName"),
+    email:    document.getElementById("rpEmail"),
+    phone:    document.getElementById("rpPhone"),
+    type:     document.getElementById("rpType"),
+    severity: document.getElementById("rpSeverity"),
+    location: document.getElementById("rpLocation"),
+    other:    document.getElementById("rpOther"),
+    date:     document.getElementById("rpDate"),
+    time:     document.getElementById("rpTime"),
+    reading:  document.getElementById("rpReading"),
+    desc:     document.getElementById("rpDesc"),
+    confirm:  document.getElementById("rpConfirm"),
+    updates:  document.getElementById("rpUpdates")
+  };
+  var otherWrap = document.getElementById("rpOtherWrap");
+  var phoneNote = document.getElementById("rpPhoneNote");
+  var counter = document.getElementById("rpDesc-count");
+
+  function toast(title, message, type) {
+    if (window.showToast) window.showToast(title, message, type);
+  }
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function isoDate(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+
+  /* ---------- date limits: today back to 30 days ago ---------- */
+  var today = new Date();
+  var oldest = new Date();
+  oldest.setDate(today.getDate() - 30);
+  f.date.setAttribute("max", isoDate(today));
+  f.date.setAttribute("min", isoDate(oldest));
+
+  /* ---------- station list comes from the Station Manager ---------- */
+  function populateStations() {
+    if (!window.getStationNames) return;
+    var names = window.getStationNames();
+    var current = f.location.value;
+
+    f.location.innerHTML = "";
+    var first = document.createElement("option");
+    first.value = "";
+    first.textContent = "Choose a station";
+    f.location.appendChild(first);
+
+    names.forEach(function (name) {
+      var opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      f.location.appendChild(opt);
+    });
+
+    var other = document.createElement("option");
+    other.value = "__other";
+    other.textContent = "Other location";
+    f.location.appendChild(other);
+
+    // Keep the visitor's choice if that station still exists
+    var stillThere = Array.prototype.some.call(f.location.options, function (o) { return o.value === current; });
+    f.location.value = stillThere ? current : "";
+    if (f.location.classList.contains("touched")) validateField(f.location);
+  }
+
+  /* ---------- messages ---------- */
+  function messageFor(field) {
+    var v = field.validity;
+    var label = field.getAttribute("data-label") || "This field";
+
+    if (v.valueMissing) {
+      if (field.type === "checkbox") return "You must tick this box to send the report.";
+      if (field.tagName === "SELECT") return "Please choose an option.";
+      return label + " is required.";
+    }
+    if (v.typeMismatch) {
+      return field.type === "email" ? "Enter a valid email address, like name@example.com." : "Enter a valid value.";
+    }
+    if (v.tooShort) {
+      return label + " needs at least " + field.minLength + " characters (you have typed " + field.value.length + ").";
+    }
+    if (v.tooLong) {
+      return label + " can have at most " + field.maxLength + " characters.";
+    }
+    if (v.patternMismatch) {
+      return field.getAttribute("data-pattern-msg") || "Please match the format asked for.";
+    }
+    if (v.rangeUnderflow) {
+      return field === f.date
+        ? "Reports can only be filed for the last 30 days."
+        : label + " must be " + field.min + " or more.";
+    }
+    if (v.rangeOverflow) {
+      return field === f.date
+        ? "The date cannot be in the future."
+        : label + " must be " + field.max + " or less.";
+    }
+    if (v.stepMismatch) return label + " must be a whole number.";
+    if (v.badInput) return "Enter a valid value.";
+    return "Please check this field.";
+  }
+
+  // Rules the HTML attributes cannot express
+  function extraRule(field) {
+    if (field === f.desc) {
+      var words = field.value.trim().split(/\s+/).filter(Boolean).length;
+      if (field.value.trim() && words < 4) return "Please describe it in at least 4 words.";
+    }
+    if (field === f.time && f.time.value && f.date.value === isoDate(new Date())) {
+      var now = new Date();
+      if (f.time.value > pad(now.getHours()) + ":" + pad(now.getMinutes())) {
+        return "The time cannot be in the future.";
+      }
+    }
+    return "";
+  }
+
+  function errorBox(field) {
+    return document.getElementById(field.id + "-error");
+  }
+
+  function showError(field, message) {
+    var box = errorBox(field);
+    if (box) box.textContent = message;
+    if (message) field.setAttribute("aria-invalid", "true");
+    else field.removeAttribute("aria-invalid");
+  }
+
+  /* ---------- check one field ---------- */
+  function validateField(field) {
+    field.setCustomValidity("");                 // clear the old message first
+    var message = "";
+    if (!field.checkValidity()) message = messageFor(field);
+    if (!message) message = extraRule(field);
+    field.setCustomValidity(message);            // an empty string means valid
+    showError(field, message);
+    return !message;
+  }
+
+  function touch(field) {
+    field.classList.add("touched");
+  }
+
+  /* ---------- live checking while the visitor fills the form ---------- */
+  fields.forEach(function (field) {
+    field.addEventListener("blur", function () {
+      if (field.required || field.value) {
+        touch(field);
+        validateField(field);
+      }
+    });
+
+    var eventName = (field.type === "checkbox" || field.tagName === "SELECT") ? "change" : "input";
+    field.addEventListener(eventName, function () {
+      if (field.classList.contains("touched")) validateField(field);
+    });
+  });
+
+  // Selects and checkboxes are "touched" as soon as they change
+  [f.type, f.severity, f.location, f.confirm].forEach(function (field) {
+    field.addEventListener("change", function () {
+      touch(field);
+      validateField(field);
+    });
+  });
+
+  /* ---------- fields that depend on other fields ---------- */
+  // "Other location" shows its own text box
+  f.location.addEventListener("change", function () {
+    var other = f.location.value === "__other";
+    otherWrap.hidden = !other;
+    f.other.required = other;
+    if (!other) {
+      f.other.value = "";
+      f.other.classList.remove("touched");
+      f.other.setCustomValidity("");
+      showError(f.other, "");
+    } else {
+      f.other.focus();
+    }
+  });
+
+  // High severity needs a phone number so an officer can call back
+  f.severity.addEventListener("change", function () {
+    var high = f.severity.value === "high";
+    f.phone.required = high;
+    phoneNote.textContent = high ? "(required for High severity)" : "(optional)";
+    if (f.phone.classList.contains("touched")) validateField(f.phone);
+    if (!high && !f.phone.value) {
+      f.phone.classList.remove("touched");
+      f.phone.setCustomValidity("");
+      showError(f.phone, "");
+    }
+  });
+
+  // Date and time are checked together
+  f.date.addEventListener("change", function () {
+    if (f.time.classList.contains("touched")) validateField(f.time);
+  });
+
+  // Live character counter for the description
+  f.desc.addEventListener("input", function () {
+    var len = f.desc.value.length;
+    var max = f.desc.maxLength;
+    counter.textContent = len + " / " + max;
+    counter.classList.toggle("near", len >= max * 0.9 && len < max);
+    counter.classList.toggle("max", len >= max);
+  });
+
+  /* ---------- submit ---------- */
+  function validateAll() {
+    var bad = 0;
+    fields.forEach(function (field) {
+      if (field.disabled || field.closest("[hidden]")) return;
+      touch(field);
+      if (!validateField(field)) bad++;
+    });
+    return bad;
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();                       // never reload the page
+
+    var bad = validateAll();
+
+    if (!form.checkValidity()) {
+      formAlert.textContent = "Please fix " + bad + (bad === 1 ? " field" : " fields") + " marked in red and try again.";
+      formAlert.hidden = false;
+      var first = form.querySelector(":invalid");
+      if (first) {
+        first.focus();
+        first.reportValidity();                   // shows the message next to the first problem
+      }
+      return;
+    }
+
+    formAlert.hidden = true;
+    showSuccess();
+  });
+
+  /* ---------- success ---------- */
+  function addSummary(list, key, value) {
+    if (!value) return;
+    var li = document.createElement("li");
+    var k = document.createElement("span");
+    k.className = "summary-key";
+    k.textContent = key;
+    var v = document.createElement("span");
+    v.className = "summary-value";
+    v.textContent = value;
+    li.appendChild(k);
+    li.appendChild(v);
+    list.appendChild(li);
+  }
+
+  function showSuccess() {
+    var ref = "EMP-" + new Date().getFullYear() + "-" + String(Math.floor(1000 + Math.random() * 9000));
+    var list = document.getElementById("successSummary");
+    list.innerHTML = "";
+
+    var where = f.location.value === "__other" ? f.other.value.trim() : f.location.value;
+    var when = new Date(f.date.value + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    if (f.time.value) when += ", " + f.time.value;
+
+    addSummary(list, "Incident", f.type.options[f.type.selectedIndex].text);
+    addSummary(list, "Severity", f.severity.options[f.severity.selectedIndex].text.split(":")[0]);
+    addSummary(list, "Location", where);
+    addSummary(list, "When", when);
+    addSummary(list, "AQI measured", f.reading.value);
+    addSummary(list, "Description", f.desc.value.trim());
+    addSummary(list, "Contact", f.email.value.trim() + (f.phone.value ? " / " + f.phone.value : ""));
+
+    document.getElementById("successName").textContent = f.name.value.trim();
+    document.getElementById("successRef").textContent = ref;
+
+    form.hidden = true;
+    success.hidden = false;
+    success.scrollIntoView({ behavior: "smooth", block: "start" });
+    success.focus({ preventScroll: true });
+    toast("Report submitted", "Reference " + ref, "success");
+
+    form.reset();                                 // the reset handler below tidies the rest
+  }
+
+  again.addEventListener("click", function () {
+    success.hidden = true;
+    form.hidden = false;
+    f.name.focus();
+  });
+
+  /* ---------- reset: clear every message and state ---------- */
+  form.addEventListener("reset", function () {
+    // wait one tick so the browser has emptied the fields first
+    setTimeout(function () {
+      fields.forEach(function (field) {
+        field.classList.remove("touched");
+        field.setCustomValidity("");
+        showError(field, "");
+      });
+      formAlert.hidden = true;
+      otherWrap.hidden = true;
+      f.other.required = false;
+      f.phone.required = false;
+      phoneNote.textContent = "(optional)";
+      counter.textContent = "0 / " + f.desc.maxLength;
+      counter.classList.remove("near", "max");
+    }, 0);
+  });
+
+  /* ---------- start ---------- */
+  populateStations();
+  document.addEventListener("stations:changed", populateStations);
+})();
